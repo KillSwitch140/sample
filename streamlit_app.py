@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 import PyPDF2
+import(‘pysqlite3’)
+import sys
 from langchain.llms import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
@@ -8,8 +10,6 @@ from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from PyPDF2 import PdfReader
 
-import(‘pysqlite3’)
-import sys
 sys.modules[‘sqlite3’] = sys.modules.pop(‘pysqlite3’)
 
 def read_pdf_text(uploaded_file):
