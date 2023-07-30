@@ -1,15 +1,26 @@
 import streamlit as st
 import os
+import PyPDF2
 from langchain.llms import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 
+
+def read_pdf_text(uploaded_file):
+    pdf_reader = PyPDF2.PdfFileReader(uploaded_file)
+    text = ""
+
+    for page_num in range(pdf_reader.getNumPages()):
+        page = pdf_reader.getPage(page_num)
+        text += page.extractText()
+
+    return text
 def generate_response(uploaded_file, openai_api_key, query_text):
     # Load document if file is uploaded
     if uploaded_file is not None:
-        documents = [uploaded_file.read().decode()]
+        documents = [read_pdf_text(uploaded_file)]
         # Split documents into chunks
         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
         texts = text_splitter.create_documents(documents)
