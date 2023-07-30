@@ -4,3 +4,4 @@ openai
 chromadb
 tiktoken
 sqlite3
+PyPDF2
