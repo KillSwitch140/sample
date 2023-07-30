@@ -8,6 +8,10 @@ from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from PyPDF2 import PdfReader
 
+import(‘pysqlite3’)
+import sys
+sys.modules[‘sqlite3’] = sys.modules.pop(‘pysqlite3’)
+
 def read_pdf_text(uploaded_file):
     pdf_reader = PdfReader(uploaded_file)
     text = ""
