@@ -6,15 +6,14 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
-
+from PyPDF2 import PdfReader
 
 def read_pdf_text(uploaded_file):
-    pdf_reader = PyPDF2.PdfFileReader(uploaded_file)
+    pdf_reader = PdfReader(uploaded_file)
     text = ""
 
-    for page_num in range(pdf_reader.getNumPages()):
-        page = pdf_reader.getPage(page_num)
-        text += page.extractText()
+    for page in pdf_reader.pages:
+        text += page.extract_text()
 
     return text
 def generate_response(uploaded_file, openai_api_key, query_text):
