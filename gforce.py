@@ -69,8 +69,8 @@ with st.form('myform', clear_on_submit=True):
             conversation_history = st.session_state.conversation_history.copy()
             # Generate the response using the updated conversation history
             result = generate_response(uploaded_file, openai_api_key, conversation_history)
-else:
-    result = []
+    else:
+        result = []
 
 # Display the conversation history
 if result:
