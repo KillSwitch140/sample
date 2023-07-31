@@ -81,7 +81,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Page title and styling
-st.set_page_config(page_title='GForce Resume Reader', layout='wide')
+st.title('GForce Resume Reader')
 
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
@@ -119,7 +119,6 @@ if st.button('Send', help='Click to submit the query'):
 
 # Display the entire conversation history in chat format
 if st.session_state.conversation_history:
-    st.header('Conversation History:')
     st.markdown('<div class="chat-area">', unsafe_allow_html=True)
     for message in st.session_state.conversation_history:
         if message['role'] == 'user':
