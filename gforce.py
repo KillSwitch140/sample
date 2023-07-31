@@ -62,11 +62,15 @@ with st.form('myform', clear_on_submit=True):
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
-# Display the conversation history
+# Display the conversation history with chat bubbles
 if len(st.session_state.conversation_history) > 1:
+    st.header('Conversation History:')
     for message in st.session_state.conversation_history[1:]:  # Skip the initial context message
         if message['role'] == 'user':
-            st.subheader('You:')
+            st.markdown(f'<div style="display: block; text-align: left; background-color: #f2f2f2; border-radius: 10px; padding: 10px; margin-bottom: 10px;">{message["content"]}</div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
-            st.subheader('Gforce:')
-        st.write(message['content'])
+            st.markdown(f'<div style="display: block; text-align: right; background-color: #0078d4; color: white; border-radius: 10px; padding: 10px; margin-bottom: 10px;">{message["content"]}</div>', unsafe_allow_html=True)
+
+# Add a clear conversation button
+if st.button('Clear Conversation'):
+    st.session_state.conversation_history = []
