@@ -28,7 +28,6 @@ def read_pdf_text(uploaded_file):
 st.set_page_config(page_title='GForce Resume Reader')
 st.title('💬 GForce Resume Reader')
 
-
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 
@@ -42,11 +41,10 @@ if uploaded_file is not None:
     st.session_state.conversation_history = [{'role': 'system', 'content': initial_context}]
 
 # User query
-query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
+query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100)
 
 # Form input and query
-with st.form('myform', clear_on_submit=True):
-    st.form_submit_button('Send', help='Click to submit the query')
+if st.button('Send', help='Click to submit the query'):
     if query_text.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
@@ -64,16 +62,18 @@ with st.form('myform', clear_on_submit=True):
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
-# Display the entire conversation history
+# Display the entire conversation history in chat format
 if st.session_state.conversation_history:
     st.header('Conversation History:')
-    with st.expander('Click to view conversation history'):
-        for message in st.session_state.conversation_history:
-            if message['role'] == 'user':
-                st.text_area(message["content"], key=message["role"], value=message["content"], height=100, disabled=True)
-            elif message['role'] == 'assistant':
-                st.text_area(message["content"], key=message["role"], value=message["content"], height=100, disabled=True, text_color='white', background_color='#0078d4')
+    for message in st.session_state.conversation_history:
+        if message['role'] == 'user':
+            st.text_area(f'You: {message["content"]}', height=100)
+        elif message['role'] == 'assistant':
+            st.text_area(f'Chatbot: {message["content"]}', height=100)
 
+# Add a clear conversation button
+if st.button('Clear Conversation'):
+    st.session_state.conversation_history.clear()
 # Add a clear conversation button
 if st.button('Clear Conversation'):
     st.session_state.conversation_history.clear()
