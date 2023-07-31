@@ -32,29 +32,38 @@ st.title('💬 GForce Resume Reader')
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 
-# Initialize or retrieve conversation history using Streamlit session_state
+# Retrieve or initialize conversation history using SessionState
 if 'messages' not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "How can I help you?"}]
 
-# Read the PDF content and set it as context for the chatbot
+# Read the PDF content and set it as the initial context for the chatbot
 if uploaded_file is not None:
-    resume_text = read_pdf_text(uploaded_file)
-    if resume_text.strip() != "":
-        st.session_state.messages[0]["content"] = f"Your resume:\n{resume_text}"
+    initial_context = read_pdf_text(uploaded_file)
+    st.session_state.messages[0]["content"] = initial_context
 
-# Display chat history
-st.title("💬 Chatbot")
+# Display chat messages
 for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
+    if msg["role"] == "user":
+        st.text_area("You:", value=msg["content"], key="user_input", height=50)
+    else:
+        st.text_area("Assistant:", value=msg["content"], key="assistant_output", height=50)
 
-# User input and chatbot response
-if prompt := st.text_input("You (Type your message here):"):
-    if not openai_api_key:
-        st.info("Please add your OpenAI API key to continue.")
-        st.stop()
+# User query
+user_input = st.text_input('Type your message here:', value='')
 
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=st.session_state.messages, api_key=openai_api_key)
+# Form input and query
+if user_input.strip() != '':
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=st.session_state.messages,
+        api_key=openai_api_key
+    )
     msg = response.choices[0].message
+    st.session_state.messages[-1]["content"] = user_input
     st.session_state.messages.append(msg)
-    st.chat_message("Assistant").write(msg.content)
+    st.session_state.messages = st.session_state.messages[-5:]  # Limiting chat history to last 5 messages
+
+# Add a clear conversation button
+if st.button('Clear Conversation'):
+    st.session_state.messages.clear()
