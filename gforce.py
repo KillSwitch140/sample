@@ -125,9 +125,9 @@ st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 if st.session_state.conversation_history:
     for i, message in enumerate(st.session_state.conversation_history):
         if message['role'] == 'user':
-            st.chat_message(f'<div class="user-bubble"><img class="avatar" src="https://www.example.com/user_avatar.jpg"/><div class="message">{message["content"]}</div></div>', unsafe_allow_html=True)
+            st.chat_message(f'<div class="user-bubble"><img class="avatar" src="https://www.example.com/user_avatar.jpg"/><div class="message">{message["content"]}</div></div>')
         elif message['role'] == 'assistant':
-            st.chat_message(f'<div class="assistant-bubble"><img class="avatar" src="https://www.example.com/assistant_avatar.jpg"/><div class="message">{message["content"]}</div></div>', unsafe_allow_html=True)
+            st.chat_message(f'<div class="assistant-bubble"><img class="avatar" src="https://www.example.com/assistant_avatar.jpg"/><div class="message">{message["content"]}</div></div>')
 
 st.markdown('</div>', unsafe_allow_html=True)
 
