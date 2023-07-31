@@ -31,7 +31,6 @@ st.title('GForce Resume Reader')
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 
-# Retrieve or initialize conversation history
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
 
@@ -51,9 +50,11 @@ with st.form('myform', clear_on_submit=True):
             # Add the user query to the conversation history
             st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
             # Get the updated conversation history
+            conversation_history = st.session_state.conversation_history.copy()
+            # Generate the response using the updated conversation history
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
-                messages=st.session_state.conversation_history,
+                messages=conversation_history,
                 api_key=openai_api_key
             )
             # Get the assistant's response
