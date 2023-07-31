@@ -12,12 +12,25 @@ from langchain.chains import RetrievalQA
 from PyPDF2 import PdfReader
 import openai
 import spacy
+import subprocess
 
 # Set up your OpenAI API key
 openai_api_key = "YOUR_OPENAI_API_KEY"
 
-# Load the spaCy model
-nlp = spacy.load("en_core_web_sm")
+def download_spacy_model():
+    try:
+        subprocess.check_output(["python", "-m", "spacy", "download", "en_core_web_sm"])
+    except subprocess.CalledProcessError as e:
+        st.error("Failed to download the spaCy model.")
+        st.stop()
+
+# Check if the spaCy model is installed, if not, download it
+if "en_core_web_sm" not in spacy.util.get_installed_models():
+    st.info("Downloading spaCy model...")
+    download_spacy_model()
+    st.info("Download complete. You can now proceed.")
+else:
+    nlp = spacy.load("en_core_web_sm"))
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
