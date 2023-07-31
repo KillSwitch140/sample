@@ -44,7 +44,7 @@ query_text = st.text_input('How can I help?:', value='', key='user_input', help=
 
 # Form input and query
 with st.form('myform', clear_on_submit=True):
-    submitted = st.form_submit_button('Submit', key='submit_button', help='Click to submit the query')
+    submitted = st.form_submit_button('Submit', disabled=not(uploaded_file and query_text))
     if submitted and query_text.strip() != '':
         with st.spinner('Loading response...'):
             # Add the user query to the conversation history
