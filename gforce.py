@@ -62,6 +62,6 @@ def sidebar():
     with st.sidebar:
             st.markdown( 
             # File upload
-            uploaded_file = st.file_uploader('Please upload you resume', type='pdf')
+            global uploaded_file = st.file_uploader('Please upload you resume', type='pdf')
             )
 sidebar()
