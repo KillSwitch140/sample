@@ -54,14 +54,15 @@ user_input = st.text_input('Type your message here:', value='')
 # Form input and query
 if user_input.strip() != '':
     st.session_state.messages.append({"role": "user", "content": user_input})
+    context = "\n".join([msg["content"] for msg in st.session_state.messages])
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=st.session_state.messages,
+        messages=[{"role": "system", "content": context}, {"role": "user", "content": user_input}],
         api_key=openai_api_key
     )
     msg = response.choices[0].message
     st.session_state.messages[-1]["content"] = user_input
-    st.session_state.messages.append(msg)
+    st.session_state.messages.append({"role": "assistant", "content": msg["content"]})
     st.session_state.messages = st.session_state.messages[-5:]  # Limiting chat history to last 5 messages
 
 # Add a clear conversation button
