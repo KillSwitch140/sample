@@ -40,7 +40,7 @@ if uploaded_file is not None:
     st.session_state.conversation_history = [{'role': 'system', 'content': initial_context}]
 
 # User query
-query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100)
+query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
 # Form input and query
 if st.button('Send', help='Click to submit the query'):
@@ -77,6 +77,7 @@ st.markdown("""
         background-color: #e0e0e0;
         border-radius: 10px;
         width: 50%;
+        margin-left: 50%;
     }
     .assistant-bubble {
         display: flex;
@@ -88,7 +89,6 @@ st.markdown("""
         color: white;
         border-radius: 10px;
         width: 50%;
-        margin-left: 50%;
     }
     .chat-input-prompt {
         position: sticky;
@@ -111,7 +111,7 @@ st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 
 # Display the entire conversation history in chat format
 if st.session_state.conversation_history:
-    for message in st.session_state.conversation_history:
+    for i, message in enumerate(st.session_state.conversation_history):
         if message['role'] == 'user':
             st.markdown(f'<div class="user-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
@@ -125,7 +125,7 @@ if st.button('Clear Conversation'):
 
 # Sticky headers and chat input prompt
 st.markdown('<div class="chat-input-prompt">', unsafe_allow_html=True)
-query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100)
+query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 if st.button('Send', help='Click to submit the query'):
     if query_text.strip() != '':
         with st.spinner('Chatbot is typing...'):
@@ -143,4 +143,5 @@ if st.button('Send', help='Click to submit the query'):
             assistant_response = response['choices'][0]['message']['content']
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
+
 st.markdown('</div>', unsafe_allow_html=True)
