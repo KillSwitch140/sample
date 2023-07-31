@@ -33,38 +33,46 @@ st.title('💬 GForce Resume Reader')
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 
 # Retrieve or initialize conversation history using SessionState
-if 'messages' not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "How can I help you?"}]
+if 'conversation_history' not in st.session_state:
+    st.session_state.conversation_history = []
 
 # Read the PDF content and set it as the initial context for the chatbot
 if uploaded_file is not None:
     initial_context = read_pdf_text(uploaded_file)
-    st.session_state.messages[0]["content"] = initial_context
+    st.session_state.conversation_history = [{'role': 'system', 'content': initial_context}]
 
-# Display chat messages
-for msg in st.session_state.messages:
-    if msg["role"] == "user":
-        st.text_area("You:", value=msg["content"], key="user_input", height=50)
-    else:
-        st.text_area("Assistant:", value=msg["content"], key="assistant_output", height=50)
+# Chatbot interface
+st.header('Chat with the Chatbot')
+
+for message in st.session_state.conversation_history:
+    if message['role'] == 'user':
+        st.text_area(message['content'], key=message['role'], height=100)
+    elif message['role'] == 'assistant':
+        st.text_area(message['content'], key=message['role'], height=100, disabled=True)
 
 # User query
-user_input = st.text_input('Type your message here:', value='')
+query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
 
 # Form input and query
-if user_input.strip() != '':
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    context = "\n".join([msg["content"] for msg in st.session_state.messages])
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "system", "content": context}, {"role": "user", "content": user_input}],
-        api_key=openai_api_key
-    )
-    msg = response.choices[0].message
-    st.session_state.messages[-1]["content"] = user_input
-    st.session_state.messages.append({"role": "assistant", "content": msg["content"]})
-    st.session_state.messages = st.session_state.messages[-5:]  # Limiting chat history to last 5 messages
+with st.form('myform', clear_on_submit=True):
+    st.form_submit_button('Send', help='Click to submit the query')
+    if query_text.strip() != '':
+        with st.spinner('Chatbot is typing...'):
+            # Add the user query to the conversation history
+            st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
+            # Get the updated conversation history
+            conversation_history = st.session_state.conversation_history.copy()
+            # Generate the response using the updated conversation history
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=conversation_history,
+                api_key=openai_api_key
+            )
+            # Get the assistant's response
+            assistant_response = response['choices'][0]['message']['content']
+            # Append the assistant's response to the conversation history
+            st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
 # Add a clear conversation button
 if st.button('Clear Conversation'):
-    st.session_state.messages.clear()
+    st.session_state.conversation_history.clear()
