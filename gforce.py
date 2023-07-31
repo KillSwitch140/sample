@@ -66,7 +66,7 @@ if send_user_query:
 st.markdown("""
 <style>
     .chat-container {
-        height: 50px;
+        height: 35px;
         overflow-y: scroll;
     }
     .user-bubble {
