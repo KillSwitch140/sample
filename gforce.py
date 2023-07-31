@@ -70,12 +70,11 @@ if st.session_state.conversation_history:
     for message in st.session_state.conversation_history:
         if message['role'] == 'user':
             # User message on the left side
-            st.write(f"You: {message['content']}")
+            chat_history_placeholder.markdown(f'<div style="display: flex; flex-direction: row; justify-content: flex-start;"><div style="background-color: #f2f2f2; border-radius: 10px; padding: 10px; margin-bottom: 10px; max-width: 70%; word-wrap: break-word;">{message["content"]}</div></div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
             # Chatbot message on the right side
-            st.write(f"Chatbot: {message['content']}")
+            chat_history_placeholder.markdown(f'<div style="display: flex; flex-direction: row; justify-content: flex-end;"><div style="background-color: #0078d4; color: white; border-radius: 10px; padding: 10px; margin-bottom: 10px; max-width: 70%; word-wrap: break-word;">{message["content"]}</div></div>', unsafe_allow_html=True)
 
 # Add a clear conversation button
 if st.button('Clear Conversation'):
     st.session_state.conversation_history.clear()
-
