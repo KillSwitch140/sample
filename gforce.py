@@ -44,8 +44,9 @@ if uploaded_file is not None:
 query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100)
 
 # Form input and query
-if st.button('Send', help='Click to submit the query'):
-    if query_text.strip() != '':
+with st.form('myform'):
+    submitted = st.form_submit_button('Send', help='Click to submit the query')
+    if submitted and query_text.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
             st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
@@ -74,6 +75,4 @@ if st.session_state.conversation_history:
 # Add a clear conversation button
 if st.button('Clear Conversation'):
     st.session_state.conversation_history.clear()
-# Add a clear conversation button
-if st.button('Clear Conversation'):
-    st.session_state.conversation_history.clear()
+    
