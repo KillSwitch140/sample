@@ -26,7 +26,7 @@ def read_pdf_text(uploaded_file):
 
 # Page title
 st.set_page_config(page_title='GForce Resume Reader')
-st.title('GForce Resume Reader')
+st.title('💬 GForce Resume Reader')
 
 
 # File upload
@@ -35,6 +35,12 @@ uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 # Initialize or retrieve conversation history using Streamlit session_state
 if 'messages' not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "How can I help you?"}]
+
+# Read the PDF content and set it as context for the chatbot
+if uploaded_file is not None:
+    resume_text = read_pdf_text(uploaded_file)
+    if resume_text.strip() != "":
+        st.session_state.messages[0]["content"] = f"Your resume:\n{resume_text}"
 
 # Display chat history
 st.title("💬 Chatbot")
