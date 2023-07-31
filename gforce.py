@@ -84,7 +84,7 @@ st.markdown("""
         justify-content: flex-start;
     }
     .user-bubble > div {
-        padding: 5px;
+        padding: 15px;
         background-color: #e0e0e0;
         border-radius: 10px;
         width: 50%;
