@@ -82,7 +82,6 @@ st.markdown("""
 
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
-st.title('GForce Resume Reader')
 
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
