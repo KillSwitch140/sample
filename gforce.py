@@ -61,6 +61,7 @@ query_text = st.text_input('You (Type your message here):', value='', help='Ask 
 
 # Form input and query
 with st.form('myform', clear_on_submit=True):
+    st.form_submit_button('Send', help='Click to submit the query')
     if query_text.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
