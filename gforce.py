@@ -56,16 +56,11 @@ if st.session_state.conversation_history:
                         f'<div style="display: block; padding: 5px; background-color: #0078d4; color: white; border-radius: 10px; width: 50%; margin-left: 50%;">{message["content"]}</div>'
                         f'</div>', unsafe_allow_html=True)
 
-# Add a clear conversation button
-if st.button('Clear Conversation'):
-    st.session_state.conversation_history.clear()
+# User query
+query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
 
 # Form input and query
 with st.form('myform', clear_on_submit=True):
-    # Query input bar
-    query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
-    st.form_submit_button('Send', help='Click to submit the query')
-
     if query_text.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
@@ -83,17 +78,6 @@ with st.form('myform', clear_on_submit=True):
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
-# Display the entire conversation history with chat bubbles
-if st.session_state.conversation_history:
-    st.header('Conversation History:')
-    chat_history_placeholder = st.empty()  # Placeholder to store chat history
-
-    for message in st.session_state.conversation_history:
-        if message['role'] == 'user':
-            st.markdown(f'<div style="display: flex; justify-content: flex-start; margin-bottom: 5px;">'
-                        f'<div style="display: block; padding: 5px; background-color: #e0e0e0; border-radius: 10px; width: 50%;">{message["content"]}</div>'
-                        f'</div>', unsafe_allow_html=True)
-        elif message['role'] == 'assistant':
-            st.markdown(f'<div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">'
-                        f'<div style="display: block; padding: 5px; background-color: #0078d4; color: white; border-radius: 10px; width: 50%; margin-left: 50%;">{message["content"]}</div>'
-                        f'</div>', unsafe_allow_html=True)
+# Add a clear conversation button
+if st.button('Clear Conversation'):
+    st.session_state.conversation_history.clear()
