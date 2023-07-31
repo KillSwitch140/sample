@@ -30,29 +30,6 @@ st.title('GForce Resume Reader')
 
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
-import streamlit as st
-import os
-import PyPDF2
-import openai
-
-# Set up your OpenAI API key
-openai_api_key = "YOUR_OPENAI_API_KEY"
-
-def read_pdf_text(uploaded_file):
-    pdf_reader = PyPDF2.PdfReader(uploaded_file)
-    text = ""
-
-    for page in pdf_reader.pages:
-        text += page.extract_text()
-
-    return text
-
-# Page title
-st.set_page_config(page_title='GForce Resume Reader')
-st.title('GForce Resume Reader')
-
-# File upload
-uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 
 # Retrieve or initialize conversation history
 if 'conversation_history' not in st.session_state:
