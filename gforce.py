@@ -125,27 +125,3 @@ st.markdown('</div>', unsafe_allow_html=True)
 clear_conversation = st.button('Clear Conversation', key="clear_conversation")
 if clear_conversation:
     st.session_state.conversation_history.clear()
-
-# Sticky headers and chat input prompt
-st.markdown('<div class="chat-input-prompt">', unsafe_allow_html=True)
-query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="chat_input")
-send_query = st.button('Send', help='Click to submit the query', key="send_query")
-if send_query:
-    if query_text.strip() != '':
-        with st.spinner('Chatbot is typing...'):
-            # Add the user query to the conversation history
-            st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
-            # Get the updated conversation history
-            conversation_history = st.session_state.conversation_history.copy()
-            # Generate the response using the updated conversation history
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=conversation_history,
-                api_key=openai_api_key
-            )
-            # Get the assistant's response
-            assistant_response = response['choices'][0]['message']['content']
-            # Append the assistant's response to the conversation history
-            st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
-
-st.markdown('</div>', unsafe_allow_html=True)
