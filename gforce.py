@@ -40,14 +40,14 @@ if uploaded_file is not None:
     st.session_state.conversation_history = [{'role': 'system', 'content': initial_context}]
 
 # User query
-query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
+user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
 # Form input and query
 if st.button('Send', help='Click to submit the query'):
-    if query_text.strip() != '':
+    if user_query.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
-            st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
+            st.session_state.conversation_history.append({'role': 'user', 'content': user_query})
             # Get the updated conversation history
             conversation_history = st.session_state.conversation_history.copy()
             # Generate the response using the updated conversation history
