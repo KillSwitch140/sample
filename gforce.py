@@ -15,7 +15,7 @@ import spacy
 import subprocess
 
 # Set up your OpenAI API key
-openai_api_key = "OPENAI_API_KEY"
+openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -30,17 +30,21 @@ def read_pdf_text(uploaded_file):
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
 
+# List to store uploaded resume contents
+uploaded_resumes = []
+
 # File upload
-uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
+uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
+
+# Process uploaded resumes
+if uploaded_files:
+    for uploaded_file in uploaded_files:
+        if uploaded_file is not None:
+            uploaded_resumes.append(read_pdf_text(uploaded_file))
 
 # Retrieve or initialize conversation history using SessionState
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
-
-# Read the PDF content and set it as the initial context for the chatbot
-if uploaded_file is not None:
-    initial_context = read_pdf_text(uploaded_file)
-    st.session_state.conversation_history = [{'role': 'system', 'content': initial_context}]
 
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
@@ -54,6 +58,8 @@ if send_user_query:
             st.session_state.conversation_history.append({'role': 'user', 'content': user_query})
             # Get the updated conversation history
             conversation_history = st.session_state.conversation_history.copy()
+            # Append the uploaded resumes' content to the conversation history
+            conversation_history.extend([{'role': 'system', 'content': resume_text} for resume_text in uploaded_resumes])
             # Generate the response using the updated conversation history
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
@@ -65,11 +71,12 @@ if send_user_query:
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
+
 # Chat UI with sticky headers and input prompt
 st.markdown("""
 <style>
     .chat-container {
-        height: 400px;
+        height: 25px;
         overflow-y: scroll;
     }
     .user-bubble {
@@ -81,18 +88,19 @@ st.markdown("""
         background-color: #e0e0e0;
         border-radius: 10px;
         width: 50%;
+        margin-left: 50%;
     }
     .assistant-bubble {
         display: flex;
         justify-content: flex-end;
     }
     .assistant-bubble > div {
-        padding: 5px;
+        padding: 15px;
         background-color: #0078d4;
         color: white;
         border-radius: 10px;
         width: 50%;
-        margin-left: 50%;
+        margin-right: 50%;
     }
     .chat-input-prompt {
         position: sticky;
