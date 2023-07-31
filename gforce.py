@@ -41,8 +41,6 @@ def generate_response(uploaded_file, openai_api_key, query_text):
 st.set_page_config(page_title='GForce Resume Reader')
 st.title('GForce Resume Reader')
 
-# File upload
-uploaded_file = st.file_uploader('Please upload you resume', type='pdf')
 # Query text
 query_text = st.text_input('How can I help?:', placeholder = 'Ask away!', disabled=not uploaded_file)
 
@@ -59,3 +57,10 @@ with st.form('myform', clear_on_submit=True):
 
 if len(result):
     st.info(response)
+
+with st.sidebar:
+        st.markdown( 
+        # File upload
+        uploaded_file = st.file_uploader('Please upload you resume', type='pdf')
+        )
+        
