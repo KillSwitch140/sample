@@ -24,9 +24,65 @@ def read_pdf_text(uploaded_file):
 
     return text
 
-# Page title
-st.set_page_config(page_title='GForce Resume Reader')
-st.title('💬 GForce Resume Reader')
+# Custom CSS styling
+st.markdown("""
+<style>
+/* Sticky top header */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: #0078d4;
+    color: white;
+    padding: 8px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Chat conversation area */
+.chat-area {
+    height: 400px;
+    overflow-y: auto;
+    padding: 8px;
+    border-radius: 10px;
+    background-color: #f2f2f2;
+}
+
+/* Chat bubbles */
+.user-bubble {
+    display: block;
+    text-align: left;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    width: 70%;
+}
+
+.chatbot-bubble {
+    display: block;
+    text-align: right;
+    background-color: #0078d4;
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    width: 70%;
+    margin-left: 30%;
+}
+
+/* Sticky bottom chat input prompt */
+.sticky-input {
+    position: sticky;
+    bottom: 0;
+    background-color: #f2f2f2;
+    padding: 8px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Page title and styling
+st.set_page_config(page_title='GForce Resume Reader', layout='wide')
+st.title('GForce Resume Reader')
 
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
@@ -41,12 +97,11 @@ if uploaded_file is not None:
     st.session_state.conversation_history = [{'role': 'system', 'content': initial_context}]
 
 # User query
-query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100)
+query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
 
 # Form input and query
-with st.form('myform'):
-    submitted = st.form_submit_button('Send', help='Click to submit the query')
-    if submitted and query_text.strip() != '':
+if st.button('Send', help='Click to submit the query'):
+    if query_text.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
             st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
@@ -66,13 +121,20 @@ with st.form('myform'):
 # Display the entire conversation history in chat format
 if st.session_state.conversation_history:
     st.header('Conversation History:')
+    st.markdown('<div class="chat-area">', unsafe_allow_html=True)
     for message in st.session_state.conversation_history:
         if message['role'] == 'user':
-            st.text_area(f'You: {message["content"]}', height=100)
+            st.markdown(f'<div class="user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
-            st.text_area(f'Chatbot: {message["content"]}', height=100)
+            st.markdown(f'<div class="chatbot-bubble">{message["content"]}</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Add a clear conversation button
 if st.button('Clear Conversation'):
     st.session_state.conversation_history.clear()
-    
+
+# Sticky input prompt
+st.markdown('<div class="sticky-input">', unsafe_allow_html=True)
+query_text = st.text_input('', value='', help='Type your message here...', type='default')
+st.button('Send', help='Click to submit the query')
+st.markdown('</div>', unsafe_allow_html=True)
