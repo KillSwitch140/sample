@@ -31,7 +31,7 @@ st.title('GForce Resume Reader')
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 
-# Retrieve or initialize conversation history
+# Retrieve or initialize conversation history using SessionState
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
 
@@ -43,10 +43,11 @@ if uploaded_file is not None:
 # User query
 query_text = st.text_input('How can I help?:', value='', help='Ask away!', type='default')
 
-with st.form('myform', clear_on_submit=True):
-    submitted = st.form_submit_button('Submit', help='Click to submit the query')
-    if submitted and query_text.strip() != '':
-        with st.spinner('Loading response...'):
+# Form input and query
+submitted = st.form_submit_button('Submit', help='Click to submit the query')
+if submitted and query_text.strip() != '':
+    with st.form('myform', clear_on_submit=True):
+        with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
             st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
             # Get the updated conversation history
@@ -56,17 +57,16 @@ with st.form('myform', clear_on_submit=True):
                 model="gpt-3.5-turbo",
                 messages=conversation_history,
                 api_key=openai_api_key
-                max_tokens=2500
             )
             # Get the assistant's response
             assistant_response = response['choices'][0]['message']['content']
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
-# Display the conversation history with chat bubbles
-if len(st.session_state.conversation_history) > 1:
+# Display the entire conversation history with chat bubbles
+if st.session_state.conversation_history:
     st.header('Conversation History:')
-    for message in st.session_state.conversation_history[1:]:  # Skip the initial context message
+    for message in st.session_state.conversation_history:
         if message['role'] == 'user':
             st.markdown(f'<div style="display: block; text-align: right; background-color: #f2f2f2; border-radius: 10px; padding: 10px; margin-bottom: 10px;">{message["content"]}</div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
