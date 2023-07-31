@@ -65,7 +65,7 @@ if st.button('Send', help='Click to submit the query'):
 st.markdown("""
 <style>
     .chat-container {
-        height: 400px;
+        height: 200px;
         overflow-y: scroll;
     }
     .user-bubble {
@@ -73,7 +73,7 @@ st.markdown("""
         justify-content: flex-start;
     }
     .user-bubble > div {
-        padding: 5px;
+        padding: 10px;
         background-color: #e0e0e0;
         border-radius: 10px;
         width: 50%;
@@ -84,7 +84,7 @@ st.markdown("""
         justify-content: flex-end;
     }
     .assistant-bubble > div {
-        padding: 5px;
+        padding: 10px;
         background-color: #0078d4;
         color: white;
         border-radius: 10px;
