@@ -105,7 +105,7 @@ st.markdown("""
         background-color: #f2f2f2;
         padding: 10px;
         width: 100%;
-    }
+    }s
 </style>
 """, unsafe_allow_html=True)
 
@@ -125,7 +125,4 @@ st.markdown('</div>', unsafe_allow_html=True)
 clear_conversation = st.button('Clear Conversation', key="clear_conversation")
 if clear_conversation:
     st.session_state.conversation_history.clear()
-# Add a clear conversation button
-clear_conversation = st.button('Clear Conversation', key="clear_conversation")
-if clear_conversation:
-    st.session_state.conversation_history.clear()
+
