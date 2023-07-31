@@ -31,6 +31,8 @@ st.title('GForce Resume Reader')
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 
+uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
+
 # Retrieve or initialize conversation history using SessionState
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
