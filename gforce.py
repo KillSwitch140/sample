@@ -15,22 +15,7 @@ import spacy
 import subprocess
 
 # Set up your OpenAI API key
-openai_api_key = "YOUR_OPENAI_API_KEY"
-
-def download_spacy_model():
-    try:
-        subprocess.check_output(["python", "-m", "spacy", "download", "en_core_web_sm"])
-    except subprocess.CalledProcessError as e:
-        st.error("Failed to download the spaCy model.")
-        st.stop()
-
-# Check if the spaCy model is installed, if not, download it
-if "en_core_web_sm" not in spacy.util.get_installed_models():
-    st.info("Downloading spaCy model...")
-    download_spacy_model()
-    st.info("Download complete. You can now proceed.")
-else:
-    nlp = spacy.load("en_core_web_sm"))
+openai_api_key = "OPENAI_API_KEY"
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -40,25 +25,6 @@ def read_pdf_text(uploaded_file):
         text += page.extract_text()
 
     return text
-
-def extract_information(text):
-    doc = nlp(text)
-    email_addresses = []
-    gpa = None
-    schools = []
-    previous_companies = []
-
-    for ent in doc.ents:
-        if ent.label_ == "EMAIL":
-            email_addresses.append(ent.text)
-        elif ent.label_ == "GPA":
-            gpa = ent.text
-        elif ent.label_ == "ORG" and "school" in ent.text.lower():
-            schools.append(ent.text)
-        elif ent.label_ == "ORG" and "company" in ent.text.lower():
-            previous_companies.append(ent.text)
-
-    return email_addresses, gpa, schools, previous_companies
 
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
@@ -109,7 +75,7 @@ if send_user_query:
 st.markdown("""
 <style>
     .chat-container {
-        height: 35px;
+        height: 400px;
         overflow-y: scroll;
     }
     .user-bubble {
@@ -117,23 +83,22 @@ st.markdown("""
         justify-content: flex-start;
     }
     .user-bubble > div {
-        padding: 15px;
+        padding: 5px;
         background-color: #e0e0e0;
         border-radius: 10px;
         width: 50%;
-        margin-left: 50%;
     }
     .assistant-bubble {
         display: flex;
         justify-content: flex-end;
     }
     .assistant-bubble > div {
-        padding: 15px;
+        padding: 5px;
         background-color: #0078d4;
         color: white;
         border-radius: 10px;
         width: 50%;
-        margin-right: 50%;
+        margin-left: 50%;
     }
     .chat-input-prompt {
         position: sticky;
@@ -148,7 +113,7 @@ st.markdown("""
         background-color: #f2f2f2;
         padding: 10px;
         width: 100%;
-    }s
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -168,21 +133,3 @@ st.markdown('</div>', unsafe_allow_html=True)
 clear_conversation = st.button('Clear Conversation', key="clear_conversation")
 if clear_conversation:
     st.session_state.conversation_history.clear()
-
-# Extract and display information from uploaded resumes
-if uploaded_resumes:
-    st.header('Extracted Information from Resumes')
-    for i, resume_text in enumerate(uploaded_resumes):
-        st.subheader(f'Resume {i + 1}')
-        st.write(resume_text)
-
-        email_addresses, gpa, schools, previous_companies = extract_information(resume_text)
-
-        if email_addresses:
-            st.write(f'Email Addresses: {", ".join(email_addresses)}')
-        if gpa:
-            st.write(f'GPA: {gpa}')
-        if schools:
-            st.write(f'Schools: {", ".join(schools)}')
-        if previous_companies:
-            st.write(f'Previous Companies: {", ".join(previous_companies)}')
