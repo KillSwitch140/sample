@@ -99,7 +99,7 @@ if uploaded_file is not None:
 query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
 
 # Form input and query
-if st.button('Send', help='Click to submit the query'):
+if st.button('Send', key=hash('send_button'), help='Click to submit the query'):
     if query_text.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
@@ -120,19 +120,19 @@ if st.button('Send', help='Click to submit the query'):
 # Display the entire conversation history in chat format
 if st.session_state.conversation_history:
     st.markdown('<div class="chat-area">', unsafe_allow_html=True)
-    for message in st.session_state.conversation_history:
+    for idx, message in enumerate(st.session_state.conversation_history):
         if message['role'] == 'user':
-            st.markdown(f'<div class="user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="user-bubble" key={hash(f"user_bubble_{idx}")}>{message["content"]}</div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
-            st.markdown(f'<div class="chatbot-bubble">{message["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="chatbot-bubble" key={hash(f"chatbot_bubble_{idx}")}>{message["content"]}</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Add a clear conversation button
-if st.button('Clear Conversation'):
+if st.button('Clear Conversation', key=hash('clear_button')):
     st.session_state.conversation_history.clear()
 
 # Sticky input prompt
 st.markdown('<div class="sticky-input">', unsafe_allow_html=True)
 query_text = st.text_input('', value='', help='Type your message here...', type='default')
-st.button('Send', help='Click to submit the query')
+st.button('Send', key=hash('send_input_button'), help='Click to submit the query')
 st.markdown('</div>', unsafe_allow_html=True)
