@@ -56,6 +56,7 @@ with st.form('myform', clear_on_submit=True):
                 model="gpt-3.5-turbo",
                 messages=conversation_history,
                 api_key=openai_api_key
+                max_tokens=2500
             )
             # Get the assistant's response
             assistant_response = response['choices'][0]['message']['content']
