@@ -64,12 +64,15 @@ with st.form('myform', clear_on_submit=True):
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
-# Display the entire conversation history using st.chat
+# Display the entire conversation history
 if st.session_state.conversation_history:
     st.header('Conversation History:')
     with st.expander('Click to view conversation history'):
-        chat_history = [{"role": message["role"], "content": message["content"]} for message in st.session_state.conversation_history]
-        st.chat(chat_history)
+        for message in st.session_state.conversation_history:
+            if message['role'] == 'user':
+                st.text_area(message["content"], key=message["role"], value=message["content"], height=100, disabled=True)
+            elif message['role'] == 'assistant':
+                st.text_area(message["content"], key=message["role"], value=message["content"], height=100, disabled=True, text_color='white', background_color='#0078d4')
 
 # Add a clear conversation button
 if st.button('Clear Conversation'):
