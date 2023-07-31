@@ -11,9 +11,7 @@ from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from PyPDF2 import PdfReader
 import openai
-import spacy
-import subprocess
-
+import re
 # Set up your OpenAI API key
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
