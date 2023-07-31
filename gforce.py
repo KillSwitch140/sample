@@ -74,11 +74,11 @@ st.markdown("""
         justify-content: flex-start;
     }
     .user-bubble > div {
-        padding: 15px;
+        padding: 5px;
         background-color: #e0e0e0;
         border-radius: 10px;
         width: 50%;
-        margin-left: 50%;
+        margin-left: 50%
     }
     .assistant-bubble {
         display: flex;
