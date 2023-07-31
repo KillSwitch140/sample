@@ -58,6 +58,8 @@ with st.form('myform', clear_on_submit=True):
                 messages=conversation_history,
                 api_key=openai_api_key
             )
+            # Print the response for debugging
+            print(response)
             # Get the assistant's response
             assistant_response = response['choices'][0]['message']['content']
             # Append the assistant's response to the conversation history
