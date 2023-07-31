@@ -42,8 +42,7 @@ st.set_page_config(page_title='GForce Resume Reader')
 st.title('GForce Resume Reader')
 
 
-# File upload
-uploaded_file = st.file_uploader('Please upload you resume', type='pdf')
+
 # Query text
 query_text = st.text_input('How can I help?:', placeholder = 'Ask away!', disabled=not uploaded_file)
 
@@ -62,18 +61,8 @@ if len(result):
     st.info(response)
 with st.sidebar:
         st.markdown(
-            "## How to use\n"
-            "1. Enter your [OpenAI API key](https://platform.openai.com/account/api-keys) below🔑\n"  # noqa: E501
-            "2. Upload a pdf, docx, or txt file📄\n"
-            "3. Ask a question about the document💬\n"
-        )
-        api_key_input = st.text_input(
-            "OpenAI API Key",
-            type="password",
-            placeholder="Paste your OpenAI API key here (sk-...)",
-            help="You can get your API key from https://platform.openai.com/account/api-keys.",  # noqa: E501
-            value=os.environ.get("OPENAI_API_KEY", None)
-            or st.session_state.get("OPENAI_API_KEY", ""),
+          # File upload
+uploaded_file = st.file_uploader('Please upload you resume', type='pdf')
         )
 
         
