@@ -43,7 +43,8 @@ if uploaded_file is not None:
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
 # Form input and query
-if st.button('Send', help='Click to submit the query'):
+send_user_query = st.button('Send', help='Click to submit the query', key="send_user_query")
+if send_user_query:
     if user_query.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
@@ -65,7 +66,7 @@ if st.button('Send', help='Click to submit the query'):
 st.markdown("""
 <style>
     .chat-container {
-        height: 400px;
+        height: 200px;
         overflow-y: scroll;
     }
     .user-bubble {
@@ -73,7 +74,7 @@ st.markdown("""
         justify-content: flex-start;
     }
     .user-bubble > div {
-        padding: 10px;
+        padding: 15px;
         background-color: #e0e0e0;
         border-radius: 10px;
         width: 50%;
@@ -84,7 +85,7 @@ st.markdown("""
         justify-content: flex-end;
     }
     .assistant-bubble > div {
-        padding: 10px;
+        padding: 15px;
         background-color: #0078d4;
         color: white;
         border-radius: 10px;
@@ -121,13 +122,15 @@ if st.session_state.conversation_history:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Add a clear conversation button
-if st.button('Clear Conversation'):
+clear_conversation = st.button('Clear Conversation', key="clear_conversation")
+if clear_conversation:
     st.session_state.conversation_history.clear()
 
 # Sticky headers and chat input prompt
 st.markdown('<div class="chat-input-prompt">', unsafe_allow_html=True)
 query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="chat_input")
-if st.button('Send', help='Click to submit the query'):
+send_query = st.button('Send', help='Click to submit the query', key="send_query")
+if send_query:
     if query_text.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
