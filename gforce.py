@@ -74,7 +74,3 @@ if st.session_state.conversation_history:
 # Add a clear conversation button
 if st.button('Clear Conversation'):
     st.session_state.conversation_history.clear()
-
-# Add a clear conversation button
-if st.button('Clear Conversation'):
-    st.session_state.conversation_history.clear()
