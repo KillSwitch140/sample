@@ -43,8 +43,10 @@ if uploaded_file is not None:
 # User query
 query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
 
-# Form input and query
+# Check if the form is submitted
 form_submitted = st.form_submit_button('Send', help='Click to submit the query')
+
+# Handle form submission and update conversation history
 if query_text.strip() != '' and form_submitted:
     with st.spinner('Chatbot is typing...'):
         # Add the user query to the conversation history
