@@ -89,6 +89,7 @@ st.markdown("""
         color: white;
         border-radius: 10px;
         width: 50%;
+        margin-right: 50%
     }
     .chat-input-prompt {
         position: sticky;
