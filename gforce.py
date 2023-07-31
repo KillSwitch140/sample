@@ -43,6 +43,7 @@ st.title('GForce Resume Reader')
 
 
 
+uploaded_file = None
 # Query text
 query_text = st.text_input('How can I help?:', placeholder = 'Ask away!', disabled=not uploaded_file)
 
@@ -59,6 +60,7 @@ with st.form('myform', clear_on_submit=True):
 
 if len(result):
     st.info(response)
+    
 with st.sidebar:
         st.markdown(
           # File upload
