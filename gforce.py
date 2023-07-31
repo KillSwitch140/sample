@@ -54,26 +54,24 @@ if st.session_state.conversation_history:
 query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
 
 # Form input and query
-form_container = st.beta_container()
-with form_container:
-    with st.form('myform', clear_on_submit=True):
-        st.form_submit_button('Send', help='Click to submit the query')
-        if query_text.strip() != '':
-            with st.spinner('Chatbot is typing...'):
-                # Add the user query to the conversation history
-                st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
-                # Get the updated conversation history
-                conversation_history = st.session_state.conversation_history.copy()
-                # Generate the response using the updated conversation history
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=conversation_history,
-                    api_key=openai_api_key
-                )
-                # Get the assistant's response
-                assistant_response = response['choices'][0]['message']['content']
-                # Append the assistant's response to the conversation history
-                st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
+with st.form('myform', clear_on_submit=True):
+    st.form_submit_button('Send', help='Click to submit the query')
+    if query_text.strip() != '':
+        with st.spinner('Chatbot is typing...'):
+            # Add the user query to the conversation history
+            st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
+            # Get the updated conversation history
+            conversation_history = st.session_state.conversation_history.copy()
+            # Generate the response using the updated conversation history
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=conversation_history,
+                api_key=openai_api_key
+            )
+            # Get the assistant's response
+            assistant_response = response['choices'][0]['message']['content']
+            # Append the assistant's response to the conversation history
+            st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
 # Add a clear conversation button
 if st.button('Clear Conversation'):
