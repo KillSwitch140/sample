@@ -40,30 +40,6 @@ if uploaded_file is not None:
     initial_context = read_pdf_text(uploaded_file)
     st.session_state.conversation_history = [{'role': 'system', 'content': initial_context}]
 
-# User query
-query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
-
-# Check if the form is submitted
-form_submitted = st.form_submit_button('Send', help='Click to submit the query')
-
-# Handle form submission and update conversation history
-if query_text.strip() != '' and form_submitted:
-    with st.spinner('Chatbot is typing...'):
-        # Add the user query to the conversation history
-        st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
-        # Get the updated conversation history
-        conversation_history = st.session_state.conversation_history.copy()
-        # Generate the response using the updated conversation history
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=conversation_history,
-            api_key=openai_api_key
-        )
-        # Get the assistant's response
-        assistant_response = response['choices'][0]['message']['content']
-        # Append the assistant's response to the conversation history
-        st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
-
 # Display the entire conversation history with chat bubbles
 st.header('Conversation History:')
 if st.session_state.conversation_history:
@@ -72,6 +48,30 @@ if st.session_state.conversation_history:
             st.markdown(f'<div style="display: block; text-align: left; padding: 5px; background-color: #e0e0e0; border-radius: 10px; margin-bottom: 5px; width: 50%;">{message["content"]}</div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
             st.markdown(f'<div style="display: block; text-align: right; padding: 5px; background-color: #0078d4; color: white; border-radius: 10px; margin-bottom: 5px; width: 50%;">{message["content"]}</div>', unsafe_allow_html=True)
+
+# User query
+query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
+
+# Form input and query
+form_submitted = False
+with st.form('myform', clear_on_submit=True):
+    form_submitted = st.form_submit_button('Send', help='Click to submit the query')
+    if query_text.strip() != '' and form_submitted:
+        with st.spinner('Chatbot is typing...'):
+            # Add the user query to the conversation history
+            st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
+            # Get the updated conversation history
+            conversation_history = st.session_state.conversation_history.copy()
+            # Generate the response using the updated conversation history
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=conversation_history,
+                api_key=openai_api_key
+            )
+            # Get the assistant's response
+            assistant_response = response['choices'][0]['message']['content']
+            # Append the assistant's response to the conversation history
+            st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
 # Add a clear conversation button
 if st.button('Clear Conversation'):
