@@ -64,10 +64,9 @@ with st.form('myform', clear_on_submit=True):
 
 # Display the conversation history
 if len(st.session_state.conversation_history) > 1:
-    st.header('Conversation History:')
     for message in st.session_state.conversation_history[1:]:  # Skip the initial context message
         if message['role'] == 'user':
-            st.subheader('User:')
+            st.subheader('You:')
         elif message['role'] == 'assistant':
-            st.subheader('Chatbot:')
+            st.subheader('Gforce:')
         st.write(message['content'])
