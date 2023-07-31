@@ -58,11 +58,10 @@ with st.form('myform', clear_on_submit=True):
 if len(result):
     st.info(response)
 
-def sidebar():
-    global uploaded_file
-    with st.sidebar:
-            st.markdown( 
-                # File upload
-                uploaded_file = st.file_uploader('Please upload you resume', type='pdf')
+  
+with st.sidebar:
+    st.markdown( 
+        # File upload
+        uploaded_file = st.file_uploader('Please upload you resume', type='pdf')
             )
-sidebar()
+
