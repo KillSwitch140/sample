@@ -41,11 +41,11 @@ if uploaded_file is not None:
     st.session_state.conversation_history = [{'role': 'system', 'content': initial_context}]
 
 # User query
-query_text = st.text_input('How can I help?:', value='', help='Ask away!', type='default')
+query_text = st.text_input('You (Type your message here):', value='', help='Ask away!', type='default')
 
 # Form input and query
 with st.form('myform', clear_on_submit=True):
-    st.form_submit_button('Submit', help='Click to submit the query')
+    st.form_submit_button('Send', help='Click to submit the query')
     if query_text.strip() != '':
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
@@ -70,9 +70,9 @@ if st.session_state.conversation_history:
 
     for message in st.session_state.conversation_history:
         if message['role'] == 'user':
-            chat_history_placeholder.markdown(f'<div style="display: block; text-align: right; background-color: #f2f2f2; border-radius: 10px; padding: 10px; margin-bottom: 10px;">{message["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="display: block; text-align: left; padding: 5px; background-color: #e0e0e0; border-radius: 10px; margin-bottom: 5px; width: 50%;">{message["content"]}</div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
-            chat_history_placeholder.markdown(f'<div style="display: block; text-align: left; background-color: #0078d4; color: white; border-radius: 10px; padding: 10px; margin-bottom: 10px;">{message["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="display: block; text-align: right; padding: 5px; background-color: #0078d4; color: white; border-radius: 10px; margin-bottom: 5px; width: 50%;">{message["content"]}</div>', unsafe_allow_html=True)
 
 # Add a clear conversation button
 if st.button('Clear Conversation'):
