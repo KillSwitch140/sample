@@ -11,9 +11,13 @@ from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from PyPDF2 import PdfReader
 import openai
+import spacy
 
 # Set up your OpenAI API key
-openai_api_key = st.secrets["OPENAI_API_KEY"]
+openai_api_key = "YOUR_OPENAI_API_KEY"
+
+# Load the spaCy model
+nlp = spacy.load("en_core_web_sm")
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -23,6 +27,26 @@ def read_pdf_text(uploaded_file):
         text += page.extract_text()
 
     return text
+
+def extract_information(text):
+    doc = nlp(text)
+    email_addresses = []
+    gpa = None
+    schools = []
+    previous_companies = []
+
+    for ent in doc.ents:
+        if ent.label_ == "EMAIL":
+            email_addresses.append(ent.text)
+        elif ent.label_ == "GPA":
+            gpa = ent.text
+        elif ent.label_ == "ORG" and "school" in ent.text.lower():
+            schools.append(ent.text)
+        elif ent.label_ == "ORG" and "company" in ent.text.lower():
+            previous_companies.append(ent.text)
+
+    return email_addresses, gpa, schools, previous_companies
+
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -67,7 +91,6 @@ if send_user_query:
             assistant_response = response['choices'][0]['message']['content']
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
-
 
 # Chat UI with sticky headers and input prompt
 st.markdown("""
@@ -132,3 +155,21 @@ st.markdown('</div>', unsafe_allow_html=True)
 clear_conversation = st.button('Clear Conversation', key="clear_conversation")
 if clear_conversation:
     st.session_state.conversation_history.clear()
+
+# Extract and display information from uploaded resumes
+if uploaded_resumes:
+    st.header('Extracted Information from Resumes')
+    for i, resume_text in enumerate(uploaded_resumes):
+        st.subheader(f'Resume {i + 1}')
+        st.write(resume_text)
+
+        email_addresses, gpa, schools, previous_companies = extract_information(resume_text)
+
+        if email_addresses:
+            st.write(f'Email Addresses: {", ".join(email_addresses)}')
+        if gpa:
+            st.write(f'GPA: {gpa}')
+        if schools:
+            st.write(f'Schools: {", ".join(schools)}')
+        if previous_companies:
+            st.write(f'Previous Companies: {", ".join(previous_companies)}')
