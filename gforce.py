@@ -76,7 +76,7 @@ if st.session_state.conversation_history:
                         f'</div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
             st.markdown(f'<div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">'
-                        f'<div style="display: block; padding: 5px; background-color: #0078d4; color: white; border-radius: 10px; width: 60%;">{message["content"]}</div>'
+                        f'<div style="display: block; padding: 5px; background-color: #0078d4; color: white; border-radius: 10px; width: 50%; margin-left: 50%;">{message["content"]}</div>'
                         f'</div>', unsafe_allow_html=True)
 
 # Add a clear conversation button
