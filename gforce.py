@@ -61,7 +61,7 @@ if st.button('Send', help='Click to submit the query'):
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
-# Chat UI with sticky headers
+# Chat UI with sticky headers and input prompt
 st.markdown("""
 <style>
     .chat-container {
@@ -73,22 +73,37 @@ st.markdown("""
         justify-content: flex-start;
     }
     .user-bubble > div {
-        padding: 5px;
+        padding: 10px;
         background-color: #e0e0e0;
         border-radius: 10px;
         width: 50%;
+        margin-left: 50%;
     }
     .assistant-bubble {
         display: flex;
         justify-content: flex-end;
     }
     .assistant-bubble > div {
-        padding: 5px;
+        padding: 10px;
         background-color: #0078d4;
         color: white;
         border-radius: 10px;
         width: 50%;
-        margin-left: 50%;
+        margin-right: 50%;
+    }
+    .chat-input-prompt {
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        padding: 10px;
+        width: 100%;
+    }
+    .chat-header {
+        position: sticky;
+        top: 0;
+        background-color: #f2f2f2;
+        padding: 10px;
+        width: 100%;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -109,26 +124,25 @@ st.markdown('</div>', unsafe_allow_html=True)
 if st.button('Clear Conversation'):
     st.session_state.conversation_history.clear()
 
-# Chat input prompt on the sidebar
-with st.sidebar:
-    st.markdown('<div class="chat-input-prompt">', unsafe_allow_html=True)
-    query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
-    if st.button('Send', help='Click to submit the query'):
-        if query_text.strip() != '':
-            with st.spinner('Chatbot is typing...'):
-                # Add the user query to the conversation history
-                st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
-                # Get the updated conversation history
-                conversation_history = st.session_state.conversation_history.copy()
-                # Generate the response using the updated conversation history
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=conversation_history,
-                    api_key=openai_api_key
-                )
-                # Get the assistant's response
-                assistant_response = response['choices'][0]['message']['content']
-                # Append the assistant's response to the conversation history
-                st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
+# Sticky headers and chat input prompt
+st.markdown('<div class="chat-input-prompt">', unsafe_allow_html=True)
+query_text = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="chat_input")
+if st.button('Send', help='Click to submit the query'):
+    if query_text.strip() != '':
+        with st.spinner('Chatbot is typing...'):
+            # Add the user query to the conversation history
+            st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
+            # Get the updated conversation history
+            conversation_history = st.session_state.conversation_history.copy()
+            # Generate the response using the updated conversation history
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=conversation_history,
+                api_key=openai_api_key
+            )
+            # Get the assistant's response
+            assistant_response = response['choices'][0]['message']['content']
+            # Append the assistant's response to the conversation history
+            st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
 
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
