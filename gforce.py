@@ -30,9 +30,6 @@ st.title('GForce Resume Reader')
 
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
-
-uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
-
 # Retrieve or initialize conversation history using SessionState
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
@@ -59,7 +56,7 @@ query_text = st.text_input('You (Type your message here):', value='', help='Ask 
 # Form input and query
 form_container = st.beta_container()
 with form_container:
-    st.form('myform', clear_on_submit=True):
+    with st.form('myform', clear_on_submit=True):
         st.form_submit_button('Send', help='Click to submit the query')
         if query_text.strip() != '':
             with st.spinner('Chatbot is typing...'):
