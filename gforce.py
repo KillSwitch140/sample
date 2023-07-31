@@ -66,11 +66,13 @@ with st.form('myform', clear_on_submit=True):
 # Display the entire conversation history with chat bubbles
 if st.session_state.conversation_history:
     st.header('Conversation History:')
+    chat_history_placeholder = st.empty()  # Placeholder to store chat history
+
     for message in st.session_state.conversation_history:
         if message['role'] == 'user':
-            st.markdown(f'<div style="display: block; text-align: right; background-color: #f2f2f2; border-radius: 10px; padding: 10px; margin-bottom: 10px;">{message["content"]}</div>', unsafe_allow_html=True)
+            chat_history_placeholder.markdown(f'<div style="display: block; text-align: left; background-color: #f2f2f2; border-radius: 10px; padding: 10px; margin-bottom: 10px;">{message["content"]}</div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
-            st.markdown(f'<div style="display: block; text-align: left; background-color: #0078d4; color: white; border-radius: 10px; padding: 10px; margin-bottom: 10px;">{message["content"]}</div>', unsafe_allow_html=True)
+            chat_history_placeholder.markdown(f'<div style="display: block; text-align: right; background-color: #0078d4; color: white; border-radius: 10px; padding: 10px; margin-bottom: 10px;">{message["content"]}</div>', unsafe_allow_html=True)
 
 # Add a clear conversation button
 if st.button('Clear Conversation'):
