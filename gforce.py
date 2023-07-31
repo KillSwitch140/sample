@@ -28,6 +28,7 @@ def read_pdf_text(uploaded_file):
 st.set_page_config(page_title='GForce Resume Reader')
 st.title('GForce Resume Reader')
 
+
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 
@@ -70,9 +71,13 @@ if st.session_state.conversation_history:
 
     for message in st.session_state.conversation_history:
         if message['role'] == 'user':
-            st.markdown(f'<div style="display: block; text-align: left; padding: 5px; background-color: #e0e0e0; border-radius: 10px; margin-bottom: 5px; width: 50%;">{message["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="display: flex; justify-content: flex-start; margin-bottom: 5px;">'
+                        f'<div style="display: block; padding: 5px; background-color: #e0e0e0; border-radius: 10px; width: 50%;">{message["content"]}</div>'
+                        f'</div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
-            st.markdown(f'<div style="display: block; text-align: right; padding: 5px; background-color: #0078d4; color: white; border-radius: 10px; margin-bottom: 5px; width: 50%;">{message["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="display: flex; justify-content: flex-end; margin-bottom: 5px;">'
+                        f'<div style="display: block; padding: 5px; background-color: #0078d4; color: white; border-radius: 10px; width: 50%;">{message["content"]}</div>'
+                        f'</div>', unsafe_allow_html=True)
 
 # Add a clear conversation button
 if st.button('Clear Conversation'):
