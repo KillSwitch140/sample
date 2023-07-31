@@ -5,3 +5,4 @@ chromadb
 tiktoken
 PyPDF2
 pysqlite3-binary
+spacy
