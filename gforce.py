@@ -43,10 +43,9 @@ if uploaded_file is not None:
 # User query
 query_text = st.text_input('How can I help?:', value='', help='Ask away!', type='default')
 
-# Form input and query
-submitted = st.form_submit_button('Submit', help='Click to submit the query')
-if submitted and query_text.strip() != '':
-    with st.form('myform', clear_on_submit=True):
+with st.form('myform', clear_on_submit=True):
+    submitted = st.form_submit_button('Submit', help='Click to submit the query')
+    if submitted and query_text.strip() != '':
         with st.spinner('Loading response...'):
             # Add the user query to the conversation history
             st.session_state.conversation_history.append({'role': 'user', 'content': query_text})
