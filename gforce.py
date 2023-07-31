@@ -72,12 +72,8 @@ st.markdown("""
     .user-bubble {
         display: flex;
         justify-content: flex-start;
-        align-items: center;
     }
-    .user-bubble > .avatar {
-        margin-right: 10px;
-    }
-    .user-bubble > .message {
+    .user-bubble > div {
         padding: 15px;
         background-color: #e0e0e0;
         border-radius: 10px;
@@ -87,9 +83,8 @@ st.markdown("""
     .assistant-bubble {
         display: flex;
         justify-content: flex-end;
-        align-items: center;
     }
-    .assistant-bubble > .message {
+    .assistant-bubble > div {
         padding: 15px;
         background-color: #0078d4;
         color: white;
@@ -111,11 +106,6 @@ st.markdown("""
         padding: 10px;
         width: 100%;
     }
-    .avatar {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -125,12 +115,16 @@ st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 if st.session_state.conversation_history:
     for i, message in enumerate(st.session_state.conversation_history):
         if message['role'] == 'user':
-            st.chat_message(f'<div class="user-bubble"><img class="avatar" src="https://www.example.com/user_avatar.jpg"/><div class="message">{message["content"]}</div></div>')
+            st.markdown(f'<div class="user-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
         elif message['role'] == 'assistant':
-            st.chat_message(f'<div class="assistant-bubble"><img class="avatar" src="https://www.example.com/assistant_avatar.jpg"/><div class="message">{message["content"]}</div></div>')
+            st.markdown(f'<div class="assistant-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
+# Add a clear conversation button
+clear_conversation = st.button('Clear Conversation', key="clear_conversation")
+if clear_conversation:
+    st.session_state.conversation_history.clear()
 # Add a clear conversation button
 clear_conversation = st.button('Clear Conversation', key="clear_conversation")
 if clear_conversation:
