@@ -31,6 +31,7 @@ st.title('GForce Resume Reader')
 # File upload
 uploaded_file = st.file_uploader('Please upload your resume', type='pdf')
 
+# Retrieve or initialize conversation history
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
 
@@ -40,11 +41,11 @@ if uploaded_file is not None:
     st.session_state.conversation_history = [{'role': 'system', 'content': initial_context}]
 
 # User query
-query_text = st.text_input('How can I help?:', value='', key='user_input', help='Ask away!', type='default')
+query_text = st.text_input('How can I help?:', value='', help='Ask away!', type='default')
 
 # Form input and query
 with st.form('myform', clear_on_submit=True):
-    submitted = st.form_submit_button('Submit', disabled=not(uploaded_file and query_text))
+    submitted = st.form_submit_button('Submit', help='Click to submit the query')
     if submitted and query_text.strip() != '':
         with st.spinner('Loading response...'):
             # Add the user query to the conversation history
