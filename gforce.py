@@ -13,12 +13,14 @@ from PyPDF2 import PdfReader
 import openai
 import re
 import spacy
+import cohere
 import sqlite3
 from database import create_connection, create_resumes_table, insert_resume, get_all_resumes
 
+
 # Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-
+cohere_api_key = st.secrets["COHERE_API_KEY"]
 # Connect to the database and create the table
 database_name = "resumes.db"
 connection = create_connection(database_name)
@@ -97,14 +99,30 @@ if uploaded_files:
             insert_resume(connection, candidate_info)
 
 
+def summarize_text(text):
+    # Use a text summarization model to summarize the text within the specified token limit.
+    co = cohere.Client(cohere_api_key)
+    summarized_text = co.summarize(
+        text=text,
+    )
+    return summarized_text
+
 def generate_response(openai_api_key, query_text, candidates_info):
     # Load document if file is uploaded
     if len(candidates_info) > 0:
-        # Append the candidate information to the conversation history
-        conversation_history = [
-            {'role': 'user', 'content': query_text}
-        ] + [{'role': 'system', 'content': f'Resume: {info["resume_text"]}'}
-             for info in candidates_info]
+        # Prepare the conversation history with user query
+        conversation_history = [{'role': 'user', 'content': query_text}]
+
+        # Process each resume separately and store the summaries in candidates_info
+        for idx, candidate_info in enumerate(candidates_info):
+            resume_text = candidate_info["resume_text"]
+            # Summarize each resume text to fit within the token limit
+            max_tokens = 4096  # Adjust this token limit as needed
+            summarized_resume_text = summarize_text(resume_text)
+            candidates_info[idx]["summarized_resume_text"] = summarized_resume_text
+
+            # Append the summarized resume text to the conversation history
+            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {summarized_resume_text}'})
 
         # Generate the response using the updated conversation history
         response = openai.ChatCompletion.create(
@@ -118,6 +136,7 @@ def generate_response(openai_api_key, query_text, candidates_info):
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
+
 
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
