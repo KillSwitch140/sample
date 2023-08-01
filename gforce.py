@@ -12,8 +12,12 @@ from langchain.chains import RetrievalQA
 from PyPDF2 import PdfReader
 import openai
 import re
-# Set up your OpenAI API key
+import spacy
+
+
+# Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
+
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -24,12 +28,40 @@ def read_pdf_text(uploaded_file):
 
     return text
 
+# Function to extract GPA using regular expression
+def extract_gpa(text):
+    gpa_pattern = r"\bGPA\b\s*:\s*([\d.]+)"
+    gpa_match = re.search(gpa_pattern, text, re.IGNORECASE)
+    return gpa_match.group(1) if gpa_match else None
+
+# Function to extract email using regular expression
+def extract_email(text):
+    email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+    email_match = re.search(email_pattern, text)
+    return email_match.group() if email_match else None
+
+# Initialize conversation history in session state
+if "conversation_history" not in st.session_state:
+    st.session_state.conversation_history = []
+
+# Function to extract candidate name using spaCy NER
+def extract_candidate_name(resume_text):
+    nlp = spacy.load("en_core_web_sm")
+    doc = nlp(resume_text)
+    candidate_name = None
+    for ent in doc.ents:
+        if ent.label_ == "PERSON":
+            candidate_name = ent.text
+            break
+    return candidate_name
+
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
 
-# List to store uploaded resume contents
+# List to store uploaded resume contents and extracted information
 uploaded_resumes = []
+candidates_info = []
 
 # File upload
 uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
@@ -38,12 +70,28 @@ uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accep
 if uploaded_files:
     for uploaded_file in uploaded_files:
         if uploaded_file is not None:
-            uploaded_resumes.append(read_pdf_text(uploaded_file))
-
-# Retrieve or initialize conversation history using SessionState
-if 'conversation_history' not in st.session_state:
-    st.session_state.conversation_history = []
-
+            resume_text = read_pdf_text(uploaded_file)
+            uploaded_resumes.append(resume_text)
+            # Extract GPA, email, and past experience
+            gpa = extract_gpa(resume_text)
+            email = extract_email(resume_text)
+            # Extract candidate name using GPT-3.5-turbo model
+            candidate_name = extract_candidate_name(resume_text)
+            # Store the information for each candidate
+            candidate_info = {
+                'name': candidate_name,
+                'gpa': gpa,
+                'email': email,
+            }
+            candidates_info.append(candidate_info)
+# Display extracted information for each candidate in the sidebar
+if candidates_info:
+    st.sidebar.subheader('Candidates Information:')
+    for idx, candidate_info in enumerate(candidates_info):
+        st.sidebar.markdown(f'<h3 style="margin-bottom:0">{f"Candidate {idx+1}"}</h3>', unsafe_allow_html=True)
+        st.sidebar.markdown(f'<div style="display:flex"><div style="width: 100px; font-weight: bold;">Name:</div><div>{candidate_info["name"]}</div></div>', unsafe_allow_html=True)
+        st.sidebar.markdown(f'<div style="display:flex"><div style="width: 100px; font-weight: bold;">GPA:</div><div>{candidate_info["gpa"]}</div></div>', unsafe_allow_html=True)
+        st.sidebar.markdown(f'<div style="display:flex"><div style="width: 100px; font-weight: bold;">Email:</div><div>{candidate_info["email"]}</div></div>', unsafe_allow_html=True)
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
