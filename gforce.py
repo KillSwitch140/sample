@@ -13,10 +13,16 @@ from PyPDF2 import PdfReader
 import openai
 import re
 import spacy
-
+import sqlite3
+from database import create_connection, create_resumes_table, insert_resume, get_all_resumes
 
 # Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
+
+# Connect to the database and create the table
+database_name = "resumes.db"
+connection = create_connection(database_name)
+create_resumes_table(connection)
 
 
 def read_pdf_text(uploaded_file):
@@ -55,6 +61,8 @@ def extract_candidate_name(resume_text):
             break
     return candidate_name
 
+
+
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -66,32 +74,51 @@ candidates_info = []
 # File upload
 uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
 
-# Process uploaded resumes
+# Process uploaded resumes and store in the database
 if uploaded_files:
     for uploaded_file in uploaded_files:
         if uploaded_file is not None:
             resume_text = read_pdf_text(uploaded_file)
             uploaded_resumes.append(resume_text)
-            # Extract GPA, email, and past experience
+            # Extract GPA, email, and past
             gpa = extract_gpa(resume_text)
             email = extract_email(resume_text)
-            # Extract candidate name using GPT-3.5-turbo model
+            # Extract candidate name using spaCy NER
             candidate_name = extract_candidate_name(resume_text)
             # Store the information for each candidate
             candidate_info = {
                 'name': candidate_name,
                 'gpa': gpa,
                 'email': email,
+                'resume_text': resume_text
             }
             candidates_info.append(candidate_info)
-# Display extracted information for each candidate in the sidebar
-if candidates_info:
-    st.sidebar.subheader('Candidates Information:')
-    for idx, candidate_info in enumerate(candidates_info):
-        st.sidebar.markdown(f'<h3 style="margin-bottom:0">{f"Candidate {idx+1}"}</h3>', unsafe_allow_html=True)
-        st.sidebar.markdown(f'<div style="display:flex"><div style="width: 100px; font-weight: bold;">Name:</div><div>{candidate_info["name"]}</div></div>', unsafe_allow_html=True)
-        st.sidebar.markdown(f'<div style="display:flex"><div style="width: 100px; font-weight: bold;">GPA:</div><div>{candidate_info["gpa"]}</div></div>', unsafe_allow_html=True)
-        st.sidebar.markdown(f'<div style="display:flex"><div style="width: 100px; font-weight: bold;">Email:</div><div>{candidate_info["email"]}</div></div>', unsafe_allow_html=True)
+            # Store the resume and information in the database
+            insert_resume(connection, candidate_info)
+
+
+def generate_response(openai_api_key, query_text, candidates_info):
+    # Load document if file is uploaded
+    if len(candidates_info) > 0:
+        # Append the candidate information to the conversation history
+        conversation_history = [
+            {'role': 'user', 'content': query_text}
+        ] + [{'role': 'system', 'content': f'Resume: {info["resume_text"]}'}
+             for info in candidates_info]
+
+        # Generate the response using the updated conversation history
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=conversation_history,
+            api_key=openai_api_key
+        )
+        # Get the assistant's response
+        assistant_response = response['choices'][0]['message']['content']
+        return assistant_response
+
+    else:
+        return "Sorry, no resumes found in the database. Please upload resumes first."
+
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
@@ -107,15 +134,9 @@ if send_user_query:
             # Append the uploaded resumes' content to the conversation history
             conversation_history.extend([{'role': 'system', 'content': resume_text} for resume_text in uploaded_resumes])
             # Generate the response using the updated conversation history
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=conversation_history,
-                api_key=openai_api_key
-            )
-            # Get the assistant's response
-            assistant_response = response['choices'][0]['message']['content']
+            response = generate_response(openai_api_key, user_query, candidates_info)
             # Append the assistant's response to the conversation history
-            st.session_state.conversation_history.append({'role': 'assistant', 'content': assistant_response})
+            st.session_state.conversation_history.append({'role': 'assistant', 'content': response})
 
 
 # Chat UI with sticky headers and input prompt
