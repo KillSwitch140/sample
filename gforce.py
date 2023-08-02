@@ -52,13 +52,32 @@ def extract_candidate_name(resume_text):
         candidate_name = first_line.strip()
         
     return candidate_name
+# Initialize conversation history in session state
+if "conversation_history" not in st.session_state:
+    st.session_state.conversation_history = [
+        {'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'}
+    ]
+# Page title and styling
+st.set_page_config(page_title='GForce Resume Reader', layout='wide')
+st.title('GForce Resume Reader')
 
-# Rest of the code remains the same...
+# List to store uploaded resume contents and extracted information
+uploaded_resumes = []
+candidates_info = []
 
 # File upload
 uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
 
-# Rest of the code remains the same...
+# Ask the user for job details as soon as they upload resumes
+job_title = st.sidebar.text_input("Enter the job title:")
+qualifications = st.sidebar.text_area("Enter the qualifications for the job (separated by commas):")
+
+# Display job details in the sidebar
+st.sidebar.header('Job Details')
+st.sidebar.write(f'Job Title: {job_title}')
+st.sidebar.write(f'Qualifications: {qualifications}')
+]
+
 
 # Process uploaded resumes and store in the database
 if uploaded_files:
