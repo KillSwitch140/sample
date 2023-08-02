@@ -77,17 +77,6 @@ def extract_experience_dates(resume_text):
 
     return experience_dates
 
-# Calculate years of experience for each candidate and store it in candidates_info
-for candidate_info in candidates_info:
-    experience_dates = extract_experience_dates(candidate_info["resume_text"])
-
-    # Find the oldest and latest experience dates
-    oldest_experience_date = min(experience_dates)
-    latest_experience_date = max(experience_dates)
-
-    # Calculate years of experience
-    years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
-
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -121,6 +110,20 @@ if uploaded_files:
             candidates_info.append(candidate_info)
             # Store the resume and information in the database
             insert_resume(connection, candidate_info)
+            
+# Calculate years of experience for each candidate and store it in candidates_info
+for candidate_info in candidates_info:
+    experience_dates = extract_experience_dates(candidate_info["resume_text"])
+
+    # Find the oldest and latest experience dates
+    oldest_experience_date = min(experience_dates)
+    latest_experience_date = max(experience_dates)
+
+    # Calculate years of experience
+    years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
+
+    # Store years_of_experience in the candidate_info dictionary
+    candidate_info["years_of_experience"] = years_of_experience
 
 # Load a pre-trained sentence transformer model
 model_name = "bert-base-nli-mean-tokens"
