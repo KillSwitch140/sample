@@ -91,7 +91,25 @@ if uploaded_files:
 
 # Function to prompt GPT-3.5-turbo with job details and user query
 def generate_response(openai_api_key, job_title, qualifications, user_query, candidates_info, connection):
-    # Rest of the code remains the same...
+    if "gpa" in user_query.lower():
+        candidate_name = extract_candidate_name(user_query)
+        if candidate_name:
+            # Query the database to get the candidate's GPA
+            query = f"SELECT gpa FROM resumes WHERE name = '{candidate_name}'"
+            cursor = connection.cursor()
+            cursor.execute(query)
+            gpa_result = cursor.fetchone()
+            cursor.close()
+
+            if gpa_result:
+                # The gpa_result is a tuple with a single element (the GPA value)
+                gpa = gpa_result[0]
+                response = f"The GPA for {candidate_name} is {gpa}."
+            else:
+                response = f"Sorry, the GPA for {candidate_name} is not available."
+
+        else:
+            response = "Sorry, I couldn't find the candidate's name to fetch the GPA."
 
     elif "email" in user_query.lower():
         candidate_name = extract_candidate_name(user_query)
