@@ -177,4 +177,13 @@ st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 if st.session_state.conversation_history:
     for i, message in enumerate(st.session_state.conversation_history):
         if message['role'] == 'user':
-            st.markdown(f'<div class="user-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True
+            st.markdown(f'<div class="user-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
+        elif message['role'] == 'assistant':
+            st.markdown(f'<div class="assistant-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Add a clear conversation button
+clear_conversation = st.button('Clear Conversation', key="clear_conversation")
+if clear_conversation:
+    st.session_state.conversation_history.clear()
