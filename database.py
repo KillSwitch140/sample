@@ -16,8 +16,6 @@ def create_resumes_table(connection):
             CREATE TABLE IF NOT EXISTS resumes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT,
-                gpa REAL,
-                email TEXT,
                 resume_text TEXT
             );
         """
@@ -32,14 +30,12 @@ def create_resumes_table(connection):
 # Function to store resume and information in the database
 def insert_resume(connection, candidate_info):
     insert_query = """
-        INSERT INTO resumes (name, gpa, email, resume_text)
-        VALUES (?, ?, ?, ?);
+        INSERT INTO resumes (name, resume_text)
+        VALUES (?, ?);
     """
     cursor = connection.cursor()
     cursor.execute(insert_query, (
         candidate_info["name"],
-        candidate_info["gpa"],
-        candidate_info["email"],
         candidate_info["resume_text"]
     ))
     connection.commit()
