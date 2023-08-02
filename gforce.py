@@ -21,6 +21,13 @@ from scipy.spatial.distance import cosine
 from sentence_transformers import SentenceTransformer
 import torch
 from datetime import datetime
+import tensorflow as tf
+import tensorflow_hub as hub
+
+# Load the Universal Sentence Encoder model
+module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
+model = hub.load(module_url)
+
 
 # Set up your OpenAI API key from Streamlit secrets
 # Set up your OpenAI API key from Streamlit secrets
@@ -83,13 +90,9 @@ model = SentenceTransformer(model_name)
 
 def get_vector_embedding(text):
     # Encode the text into a vector representation
-    embeddings = model.encode(text, convert_to_tensor=True)
-
-    # Take the mean of all token embeddings to get the sentence-level embedding
-    sentence_embedding = torch.mean(embeddings, dim=0)
-
-    # Convert the torch tensor to a numpy array
-    sentence_embedding = sentence_embedding.detach().numpy()
+    embeddings = model([text])
+    # Convert the embeddings tensor to a numpy array
+    sentence_embedding = embeddings.numpy()[0]
 
     return sentence_embedding
 
