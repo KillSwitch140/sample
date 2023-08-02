@@ -1,18 +1,19 @@
 import streamlit as st
 import PyPDF2
-import openai
-import spacy
 import re
+import spacy
+import openai
 from database import create_connection, create_resumes_table, insert_resume, get_all_resumes
 
 # Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-cohere_api_key = st.secrets["COHERE_API_KEY"]
+
 # Connect to the database and create the table
 database_name = "resumes.db"
 connection = create_connection(database_name)
 create_resumes_table(connection)
 
+# Function to read PDF text
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
     text = ""
@@ -22,16 +23,7 @@ def read_pdf_text(uploaded_file):
 
     return text
 
-def extract_gpa(text):
-    gpa_pattern = r"\bGPA\b\s*:\s*([\d.]+)"
-    gpa_match = re.search(gpa_pattern, text, re.IGNORECASE)
-    return gpa_match.group(1) if gpa_match else None
-
-def extract_email(text):
-    email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-    email_match = re.search(email_pattern, text)
-    return email_match.group() if email_match else None
-
+# Function to extract candidate name using spaCy NER
 def extract_candidate_name(resume_text):
     # Assume the candidate name is in the first line of the resume text
     first_line = resume_text.strip().split('\n')[0]
@@ -53,11 +45,13 @@ def extract_candidate_name(resume_text):
         candidate_name = first_line.strip()
         
     return candidate_name
+
 # Initialize conversation history in session state
 if "conversation_history" not in st.session_state:
     st.session_state.conversation_history = [
         {'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'}
     ]
+
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -78,23 +72,17 @@ st.sidebar.header('Job Details')
 st.sidebar.write(f'Job Title: {job_title}')
 st.sidebar.write(f'Qualifications: {qualifications}')
 
-
-
 # Process uploaded resumes and store in the database
 if uploaded_files:
     for uploaded_file in uploaded_files:
         if uploaded_file is not None:
             resume_text = read_pdf_text(uploaded_file)
             uploaded_resumes.append(resume_text)
-            # Extract GPA, email, and candidate name
-            gpa = extract_gpa(resume_text)
-            email = extract_email(resume_text)
+            # Extract candidate name using spaCy NER
             candidate_name = extract_candidate_name(resume_text)
             # Store the information for each candidate
             candidate_info = {
                 'name': candidate_name,
-                'gpa': gpa,
-                'email': email,
                 'resume_text': resume_text
             }
             candidates_info.append(candidate_info)
@@ -103,25 +91,7 @@ if uploaded_files:
 
 # Function to prompt GPT-3.5-turbo with job details and user query
 def generate_response(openai_api_key, job_title, qualifications, user_query, candidates_info, connection):
-    if "gpa" in user_query.lower():
-        candidate_name = extract_candidate_name(user_query)
-        if candidate_name:
-            # Query the database to get the candidate's GPA
-            query = f"SELECT gpa FROM resumes WHERE name = '{candidate_name}'"
-            cursor = connection.cursor()
-            cursor.execute(query)
-            gpa_result = cursor.fetchone()
-            cursor.close()
-
-            if gpa_result:
-                # The gpa_result is a tuple with a single element (the GPA value)
-                gpa = gpa_result[0]
-                response = f"The GPA for {candidate_name} is {gpa}."
-            else:
-                response = f"Sorry, the GPA for {candidate_name} is not available."
-
-        else:
-            response = "Sorry, I couldn't find the candidate's name to fetch the GPA."
+    # Rest of the code remains the same...
 
     elif "email" in user_query.lower():
         candidate_name = extract_candidate_name(user_query)
@@ -152,9 +122,9 @@ def generate_response(openai_api_key, job_title, qualifications, user_query, can
             api_key=openai_api_key
         )
 
-        assistant_response = response['choices'][0]['message']['content']
+        response = response['choices'][0]['message']['content']
 
-    return assistant_response
+    return responsese
 
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
