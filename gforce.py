@@ -22,6 +22,7 @@ from sentence_transformers import SentenceTransformer
 import torch
 from datetime import datetime
 # Set up your OpenAI API key from Streamlit secrets
+# Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 cohere_api_key = st.secrets["COHERE_API_KEY"]
 
@@ -29,7 +30,6 @@ cohere_api_key = st.secrets["COHERE_API_KEY"]
 database_name = "resumes.db"
 connection = create_connection(database_name)
 create_resumes_table(connection)
-
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -77,23 +77,6 @@ def extract_experience_dates(resume_text):
 
     return experience_dates
 
-
-
-# Function to summarize the text using Cohere API
-def summarize_text(text):
-    # Use a text summarization model to summarize the text within the specified token limit.
-    co = cohere.Client(cohere_api_key)
-    summarized_text = co.summarize(
-        model='summarize-medium', 
-        length='long',
-        extractiveness='high',
-        format='paragraph',
-        temperature= 0.2,
-        additional_command='Generate a summary for this resume',
-        text=text
-    )
-    return summarized_text
-
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -126,15 +109,12 @@ if uploaded_files:
             else:
                 # If no experience dates are found, set years_of_experience to None
                 years_of_experience = None
-            # Summarize the resume text
-            summarized_resume_text = summarize_text(resume_text)
             # Store the information for each candidate
             candidate_info = {
                 'name': candidate_name,
                 'gpa': gpa,
                 'email': email,
                 'resume_text': resume_text,
-                'summarized_resume_text': summarized_resume_text,
                 'years_of_experience': years_of_experience
             }
             candidates_info.append(candidate_info)
@@ -142,27 +122,49 @@ if uploaded_files:
             insert_resume(connection, candidate_info)
 
 # Function to get vector embeddings using Cohere API
-def get_vector_embedding(text):
+def get_vector_embedding(batch):
+    # Get embeddings for each chunk
     co = cohere.Client(cohere_api_key)
-    # Split the text into smaller chunks of max 512 tokens
-    chunked_texts = [text[i:i + 512] for i in range(0, len(text), 512)]
-    embeddings = []
-    # Call the embed API for each chunk
-    for chunk in chunked_texts:
-        response = co.embed(
-            texts=[chunk],
-            model='embed-english-v2.0',
-        )
-        embeddings.extend(response['embeddings'])
+    response = co.embed(
+        texts=batch,
+        model='embed-english-v2.0',
+    )
+    embeddings = response['embeddings']
 
     return embeddings
 
 # Calculate and store vector embeddings for each candidate
-for candidate_info in candidates_info:
-    text = candidate_info["summarized_resume_text"]
-    embedding = get_vector_embedding(text)
-    # Store the embedding in the database (Note: This will overwrite previous embeddings if any)
-    update_embeddings(connection, candidate_info["name"], embedding)
+batch_size = 96
+batch = []
+batch_ids = []
+vectors = []
+vector_ids = []
+
+for i, candidate_info in enumerate(candidates_info):
+    if i % 500 == 0:
+        print(f"{i/len(candidates_info) * 100:.2f}%")
+
+    resume_text = candidate_info["resume_text"]
+    if len(resume_text) > 5:
+        batch_ids.append(i)
+        batch.append(resume_text)
+
+    if len(batch) >= batch_size:
+        embeddings = get_vector_embedding(batch)
+        vectors.extend(embeddings)
+        vector_ids.extend(batch_ids)
+        batch = []
+        batch_ids = []
+
+if len(batch) > 0:
+    embeddings = get_vector_embedding(batch)
+    vectors.extend(embeddings)
+    vector_ids.extend(batch_ids)
+
+# Store the embeddings in the database
+for i, embedding in zip(vector_ids, vectors):
+    candidate_name = candidates_info[i]["name"]
+    update_embeddings(connection, candidate_name, embedding)
 
 # Function to retrieve vector embeddings from the database
 def get_candidate_embedding(candidate_name):
