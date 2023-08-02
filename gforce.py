@@ -20,6 +20,7 @@ import numpy as np
 from scipy.spatial.distance import cosine
 from sentence_transformers import SentenceTransformer
 import torch
+from datetime import datetime
 
 # Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -65,6 +66,30 @@ def extract_candidate_name(resume_text):
             candidate_name = ent.text
             break
     return candidate_name
+
+def extract_experience_dates(resume_text):
+    # Use regular expressions to extract experience dates from the resume text
+    date_pattern = r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b"  # Assumes dates in the format DD/MM/YYYY
+    experience_dates = re.findall(date_pattern, resume_text)
+
+    # Convert the extracted dates to datetime objects
+    experience_dates = [datetime(int(year), int(month), int(day)) for day, month, year in experience_dates]
+
+    return experience_dates
+
+# Calculate years of experience for each candidate and store it in candidates_info
+for candidate_info in candidates_info:
+    experience_dates = extract_experience_dates(candidate_info["resume_text"])
+
+    # Find the oldest and latest experience dates
+    oldest_experience_date = min(experience_dates)
+    latest_experience_date = max(experience_dates)
+
+    # Calculate years of experience
+    years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
+
+    # Store years_of_experience in the candidate_info dictionary
+    candidate_info["years_of_experience"] = years_of_experience
 
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
@@ -120,7 +145,7 @@ def summarize_text(text):
     # Use a text summarization model to summarize the text within the specified token limit.
     co = cohere.Client(cohere_api_key)
     summarized_text = co.summarize(
-        model='summarize-xlarge', 
+        model='summarize-medium', 
         length='long',
         extractiveness='high',
         format='paragraph',
