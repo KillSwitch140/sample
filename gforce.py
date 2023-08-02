@@ -31,6 +31,9 @@ database_name = "resumes.db"
 connection = create_connection(database_name)
 create_resumes_table(connection)
 
+# Page title and styling
+st.set_page_config(page_title='GForce Resume Reader', layout='wide')
+st.title('GForce Resume Reader')
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
