@@ -175,7 +175,9 @@ if send_user_query:
             # Append the uploaded resumes' content to the conversation history
             conversation_history.extend([{'role': 'system', 'content': resume_text} for resume_text in uploaded_resumes])
             # Generate the response using the updated conversation history
-            response = generate_response(openai_api_key, user_query, candidates_info
+            response = generate_response(openai_api_key, user_query, conversation_history)
+            # Append the assistant's response to the conversation history
+            st.session_state.conversation_history.append({'role': 'assistant', 'content': response})
 
 
 # Chat UI with sticky headers and input prompt
