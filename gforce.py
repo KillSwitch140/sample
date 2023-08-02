@@ -58,6 +58,12 @@ def extract_candidate_name(resume_text):
         
     return candidate_name
 
+# Initialize conversation history in session state
+if "conversation_history" not in st.session_state:
+    st.session_state.conversation_history = [
+        {'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'}
+    ]
+
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -105,12 +111,9 @@ def generate_response(openai_api_key, job_title, qualifications, user_query, can
     # Load document if file is uploaded
     if len(candidates_info) > 0:
         # Prepare the conversation history with system message introducing the bot's role and user query
-        conversation_history = [
-            {'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'},
+        conversation_history = [   
             {'role': 'user', 'content': user_query},
-            {'role': 'system', 'content': f'You are looking for candidates for the position of {job_title} with qualifications in {qualifications}. Please recommend the top candidates.'}
         ]
-
         # Process resumes and store the summaries in candidates_info
         for idx, candidate_info in enumerate(candidates_info):
             resume_text = candidate_info["resume_text"]
