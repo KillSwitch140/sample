@@ -76,7 +76,7 @@ qualifications = st.sidebar.text_area("Enter the qualifications for the job (sep
 st.sidebar.header('Job Details')
 st.sidebar.write(f'Job Title: {job_title}')
 st.sidebar.write(f'Qualifications: {qualifications}')
-]
+
 
 
 # Process uploaded resumes and store in the database
