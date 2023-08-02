@@ -109,6 +109,7 @@ def summarize_text(text):
         format='paragraph',
         temperature= 0.2,
         text=text,
+        additional_command = 'Generate a summary for this resume'
     )
     return summarized_text
 
