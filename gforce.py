@@ -100,6 +100,11 @@ def generate_response(openai_api_key, job_title, qualifications, user_query, can
         resume_text = candidate_info["resume_text"]
         conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
 
+        # Add prompts for GPA and email based on the candidate name
+        candidate_name = candidate_info["name"]
+        conversation_history.append({'role': 'system', 'content': f'GPA for {candidate_name}'})
+        conversation_history.append({'role': 'system', 'content': f'Email for {candidate_name}'})
+
     # Use GPT-3.5-turbo for recruiter assistant tasks based on prompts
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
