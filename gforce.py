@@ -23,6 +23,7 @@ import torch
 from datetime import datetime
 
 # Set up your OpenAI API key from Streamlit secrets
+# Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 cohere_api_key = st.secrets["COHERE_API_KEY"]
 # Connect to the database and create the table
@@ -52,10 +53,6 @@ def extract_email(text):
     email_match = re.search(email_pattern, text)
     return email_match.group() if email_match else None
 
-# Initialize conversation history in session state
-if "conversation_history" not in st.session_state:
-    st.session_state.conversation_history = []
-
 # Function to extract candidate name using spaCy NER
 def extract_candidate_name(resume_text):
     nlp = spacy.load("en_core_web_sm")
@@ -76,54 +73,6 @@ def extract_experience_dates(resume_text):
     experience_dates = [datetime(int(year), int(month), int(day)) for day, month, year in experience_dates]
 
     return experience_dates
-
-# Page title and styling
-st.set_page_config(page_title='GForce Resume Reader', layout='wide')
-st.title('GForce Resume Reader')
-
-# List to store uploaded resume contents and extracted information
-uploaded_resumes = []
-candidates_info = []
-
-# File upload
-uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
-
-# Process uploaded resumes and store in the database
-if uploaded_files:
-    for uploaded_file in uploaded_files:
-        if uploaded_file is not None:
-            resume_text = read_pdf_text(uploaded_file)
-            uploaded_resumes.append(resume_text)
-            # Extract GPA, email, and past
-            gpa = extract_gpa(resume_text)
-            email = extract_email(resume_text)
-            # Extract candidate name using spaCy NER
-            candidate_name = extract_candidate_name(resume_text)
-            # Store the information for each candidate
-            candidate_info = {
-                'name': candidate_name,
-                'gpa': gpa,
-                'email': email,
-                'resume_text': resume_text
-                'years_of_experience': years_of_experience
-            }
-            candidates_info.append(candidate_info)
-            # Store the resume and information in the database
-            insert_resume(connection, candidate_info)
-            
-# Calculate years of experience for each candidate and store it in candidates_info
-for candidate_info in candidates_info:
-    experience_dates = extract_experience_dates(candidate_info["resume_text"])
-
-    # Find the oldest and latest experience dates
-    oldest_experience_date = min(experience_dates)
-    latest_experience_date = max(experience_dates)
-
-    # Calculate years of experience
-    years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
-
-    # Store years_of_experience in the candidate_info dictionary
-    candidate_info["years_of_experience"] = years_of_experience
 
 # Load a pre-trained sentence transformer model
 model_name = "bert-base-nli-mean-tokens"
@@ -213,6 +162,50 @@ def generate_response(openai_api_key, query_text, candidates_info):
         return "Sorry, no resumes found in the database. Please upload resumes first."
 
 
+# Initialize conversation history in session state
+if "conversation_history" not in st.session_state:
+    st.session_state.conversation_history = []
+
+# List to store uploaded resume contents and extracted information
+uploaded_resumes = []
+candidates_info = []
+
+# File upload
+uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
+
+# Process uploaded resumes and store in the database
+if uploaded_files:
+    for uploaded_file in uploaded_files:
+        if uploaded_file is not None:
+            resume_text = read_pdf_text(uploaded_file)
+            uploaded_resumes.append(resume_text)
+            # Extract GPA, email, and past
+            gpa = extract_gpa(resume_text)
+            email = extract_email(resume_text)
+            # Extract candidate name using spaCy NER
+            candidate_name = extract_candidate_name(resume_text)
+            # Store the information for each candidate
+            candidate_info = {
+                'name': candidate_name,
+                'gpa': gpa,
+                'email': email,
+                'resume_text': resume_text
+            }
+            candidates_info.append(candidate_info)
+            # Store the resume and information in the database
+            insert_resume(connection, candidate_info)
+            
+            # Calculate years of experience for each candidate and store it in candidates_info
+            experience_dates = extract_experience_dates(candidate_info["resume_text"])
+            # Find the oldest and latest experience dates
+            oldest_experience_date = min(experience_dates)
+            latest_experience_date = max(experience_dates)
+            # Calculate years of experience
+            years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
+            # Store years_of_experience in the candidate_info dictionary
+            candidate_info["years_of_experience"] = years_of_experience
+
+
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
@@ -231,6 +224,7 @@ if send_user_query:
             response = generate_response(openai_api_key, user_query, candidates_info)
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': response})
+
 
 
 # Chat UI with sticky headers and input prompt
