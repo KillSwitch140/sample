@@ -176,7 +176,6 @@ candidates_info = []
 # File upload
 uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
 
-# Process uploaded resumes and store in the database
 if uploaded_files:
     for uploaded_file in uploaded_files:
         if uploaded_file is not None:
@@ -200,14 +199,18 @@ if uploaded_files:
             
             # Calculate years of experience for each candidate and store it in candidates_info
             experience_dates = extract_experience_dates(candidate_info["resume_text"])
-            # Find the oldest and latest experience dates
-            oldest_experience_date = min(experience_dates)
-            latest_experience_date = max(experience_dates)
-            # Calculate years of experience
-            years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
-            # Store years_of_experience in the candidate_info dictionary
-            candidate_info["years_of_experience"] = years_of_experience
-
+            # Check if experience_dates is empty
+            if experience_dates:
+                # Find the oldest and latest experience dates
+                oldest_experience_date = min(experience_dates)
+                latest_experience_date = max(experience_dates)
+                # Calculate years of experience
+                years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
+                # Store years_of_experience in the candidate_info dictionary
+                candidate_info["years_of_experience"] = years_of_experience
+            else:
+                # If no experience dates are found, assign default values
+                candidate_info["years_of_experience"] = 0
 
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
