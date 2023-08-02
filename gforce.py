@@ -63,8 +63,6 @@ def extract_candidate_name(resume_text):
             break
     return candidate_name
 
-
-
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
