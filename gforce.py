@@ -132,6 +132,90 @@ def generate_response(openai_api_key, job_title, qualifications, user_query, can
             api_key=openai_api_key
         )
 
-        response = response['choices'][0]['message']['content']
+        assistant_response = response['choices'][0]['message']['content']
 
-    return response
+    return assistant_response
+
+# User query
+user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
+
+# Form input and query
+send_user_query = st.button('Send', help='Click to submit the query', key="send_user_query")
+if send_user_query:
+    if user_query.strip() != '':
+        with st.spinner('Chatbot is typing...'):
+            # Add the user query to the conversation history
+            st.session_state.conversation_history.append({'role': 'user', 'content': user_query})
+            # Get the updated conversation history
+            conversation_history = st.session_state.conversation_history.copy()
+            # Append the uploaded resumes' content to the conversation history
+            conversation_history.extend([{'role': 'system', 'content': resume_text} for resume_text in uploaded_resumes])
+            # Generate the response using the updated conversation history
+            response = generate_response(openai_api_key, user_query, candidates_info)
+            # Append the assistant's response to the conversation history
+            st.session_state.conversation_history.append({'role': 'assistant', 'content': response})
+
+# Chat UI with sticky headers and input prompt
+st.markdown("""
+<style>
+    .chat-container {
+        height: 25px;
+        overflow-y: scroll;
+    }
+    .user-bubble {
+        display: flex;
+        justify-content: flex-start;
+    }
+    .user-bubble > div {
+        padding: 15px;
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        width: 50%;
+        margin-left: 50%;
+    }
+    .assistant-bubble {
+        display: flex;
+        justify-content: flex-end;
+    }
+    .assistant-bubble > div {
+        padding: 15px;
+        background-color: #0078d4;
+        color: white;
+        border-radius: 10px;
+        width: 50%;
+        margin-right: 50%;
+    }
+    .chat-input-prompt {
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        padding: 10px;
+        width: 100%;
+    }
+    .chat-header {
+        position: sticky;
+        top: 0;
+        background-color: #f2f2f2;
+        padding: 10px;
+        width: 100%;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+
+# Display the entire conversation history in chat format
+if st.session_state.conversation_history:
+    for i, message in enumerate(st.session_state.conversation_history):
+        if message['role'] == 'user':
+            st.markdown(f'<div class="user-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
+        elif message['role'] == 'assistant':
+            st.markdown(f'<div class="assistant-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Add a clear conversation button
+clear_conversation = st.button('Clear Conversation', key="clear_conversation")
+if clear_conversation:
+    st.session_state.conversation_history.clear()
+
