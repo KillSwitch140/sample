@@ -107,7 +107,7 @@ def summarize_text(text):
         length='long',
         extractiveness='high',
         format='paragraph',
-        temperature= 0.2
+        temperature= 0.2,
         text=text,
     )
     return summarized_text
