@@ -23,18 +23,6 @@ def read_pdf_text(uploaded_file):
 
     return text
 
-# Function to extract GPA using regular expression
-def extract_gpa(text):
-    gpa_pattern = r"\bGPA\b\s*:\s*([\d.]+)"
-    gpa_match = re.search(gpa_pattern, text, re.IGNORECASE)
-    return gpa_match.group(1) if gpa_match else None
-
-# Function to extract email using regular expression
-def extract_email(text):
-    email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
-    email_match = re.search(email_pattern, text)
-    return email_match.group() if email_match else None
-
 # Function to extract candidate name using spaCy NER
 def extract_candidate_name(resume_text):
     # Assume the candidate name is in the first line of the resume text
@@ -90,16 +78,11 @@ if uploaded_files:
         if uploaded_file is not None:
             resume_text = read_pdf_text(uploaded_file)
             uploaded_resumes.append(resume_text)
-            # Extract GPA, email, and past
-            gpa = extract_gpa(resume_text)
-            email = extract_email(resume_text)
             # Extract candidate name using spaCy NER
             candidate_name = extract_candidate_name(resume_text)
             # Store the information for each candidate
             candidate_info = {
                 'name': candidate_name,
-                'gpa': gpa,
-                'email': email,
                 'resume_text': resume_text
             }
             candidates_info.append(candidate_info)
@@ -108,30 +91,25 @@ if uploaded_files:
 
 # Function to prompt GPT-3.5-turbo with job details and user query
 def generate_response(openai_api_key, job_title, qualifications, user_query, candidates_info):
-    # Load document if file is uploaded
-    if len(candidates_info) > 0:
-        # Prepare the conversation history with system message introducing the bot's role and user query
-        conversation_history = [   
-            {'role': 'user', 'content': user_query},
-        ]
-        # Process resumes and store the summaries in candidates_info
-        for idx, candidate_info in enumerate(candidates_info):
-            resume_text = candidate_info["resume_text"]
-            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
+    # Prepare the conversation history with system message introducing the bot's role and user query
+    conversation_history = [   
+        {'role': 'user', 'content': user_query},
+    ]
+    # Process resumes and store the summaries in candidates_info
+    for idx, candidate_info in enumerate(candidates_info):
+        resume_text = candidate_info["resume_text"]
+        conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
 
-        # Use GPT-3.5-turbo for recruiter assistant tasks based on prompts
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=conversation_history,
-            api_key=openai_api_key
-        )
+    # Use GPT-3.5-turbo for recruiter assistant tasks based on prompts
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=conversation_history,
+        api_key=openai_api_key
+    )
 
-        # Get the assistant's response
-        assistant_response = response['choices'][0]['message']['content']
-        return assistant_response
-
-    else:
-        return "Sorry, no resumes found in the database. Please upload resumes first."
+    # Get the assistant's response
+    assistant_response = response['choices'][0]['message']['content']
+    return assistant_response
 
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
@@ -199,13 +177,4 @@ st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 if st.session_state.conversation_history:
     for i, message in enumerate(st.session_state.conversation_history):
         if message['role'] == 'user':
-            st.markdown(f'<div class="user-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
-        elif message['role'] == 'assistant':
-            st.markdown(f'<div class="assistant-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Add a clear conversation button
-clear_conversation = st.button('Clear Conversation', key="clear_conversation")
-if clear_conversation:
-    st.session_state.conversation_history.clear()
+            st.markdown(f'<div class="user-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True
