@@ -147,19 +147,14 @@ def generate_response(openai_api_key, job_title, qualifications, user_query, can
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
+
 # Form input and query
 send_user_query = st.button('Send', help='Click to submit the query', key="send_user_query")
 if send_user_query:
     if user_query.strip() != '':
         with st.spinner('Chatbot is typing...'):
-            # Add the user query to the conversation history
-            st.session_state.conversation_history.append({'role': 'user', 'content': user_query})
-            # Get the updated conversation history
-            conversation_history = st.session_state.conversation_history.copy()
-            # Append the uploaded resumes' content to the conversation history
-            conversation_history.extend([{'role': 'system', 'content': resume_text} for resume_text in uploaded_resumes])
-            # Generate the response using the updated conversation history
-            response = generate_response(openai_api_key, user_query, candidates_info)
+            # Generate the response using the job details and user query
+            response = generate_response(openai_api_key, job_title, qualifications, user_query, candidates_info, connection)
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': response})
 
