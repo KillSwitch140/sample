@@ -1,22 +1,11 @@
-import pysqlite3
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
 import os
 import PyPDF2
-from langchain.llms import OpenAI
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.chains import RetrievalQA
-from PyPDF2 import PdfReader
 import openai
 import re
 import spacy
-import cohere
 import sqlite3
 from database import create_connection, create_resumes_table, insert_resume, get_all_resumes
-
 
 # Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -86,6 +75,11 @@ candidates_info = []
 # File upload
 uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
 
+# Ask the user for job details
+job_title = st.text_input("Enter the job title:")
+qualifications = st.text_area("Enter the qualifications for the job (separated by commas):")
+qualifications_list = [qualification.strip() for qualification in qualifications.split(",")]
+
 # Process uploaded resumes and store in the database
 if uploaded_files:
     for uploaded_file in uploaded_files:
@@ -108,23 +102,35 @@ if uploaded_files:
             # Store the resume and information in the database
             insert_resume(connection, candidate_info)
 
+# Function to get job details from user input
+def get_job_details():
+    job_title = st.text_input("Enter the job title:")
+    qualifications = st.text_area("Enter the qualifications for the job (separated by commas):")
+    qualifications_list = [qualification.strip() for qualification in qualifications.split(",")]
+    return job_title, qualifications_list
 
 def generate_response(openai_api_key, query_text, candidates_info):
     # Load document if file is uploaded
     if len(candidates_info) > 0:
-        # Prepare the conversation history with user query
-        conversation_history = [{'role': 'user', 'content': query_text}]
+        # Prepare the conversation history with system message introducing the bot's role
+        if not st.session_state.conversation_history:
+            conversation_history = [
+                {'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'},
+                {'role': 'system', 'content': f'You are looking for candidates for the position of {job_title} with qualifications in {", ".join(qualifications_list)}.'},
+                {'role': 'user', 'content': query_text}
+            ]
+        else:
+            conversation_history = st.session_state.conversation_history
 
         # Process resumes and store the summaries in candidates_info
         for idx, candidate_info in enumerate(candidates_info):
             resume_text = candidate_info["resume_text"]
             conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
 
-
         # Check if the user query is related to selecting candidates based on qualifications
-        if "recommend candidate" in query_text.lower() and any(keyword in query_text.lower() for keyword in ["linux", "react", "mvp"]):
+        if "recommend candidate" in query_text.lower() and any(keyword in query_text.lower() for keyword in ["position", "job", "role", "qualifications"]):
             # Add a prompt for selecting candidates based on qualifications
-            prompt = "Based on the qualifications of experience in Linux, React, MVP, etc., please choose the candidate with the same or similar qualifications."
+            prompt = "Based on the qualifications you provided, please recommend the top candidates."
 
             # Append the prompt to the conversation history
             conversation_history.append({'role': 'user', 'content': prompt})
@@ -138,8 +144,10 @@ def generate_response(openai_api_key, query_text, candidates_info):
         }
 
         # Add a prompt for the specific query provided by the user
-        if query_text in recruiter_prompts:
-            conversation_history.append({'role': 'user', 'content': recruiter_prompts[query_text]})
+        for keyword in recruiter_prompts:
+            if keyword in query_text.lower():
+                conversation_history.append({'role': 'user', 'content': recruiter_prompts[keyword]})
+                break
 
         # Generate the response using the updated conversation history
         response = openai.ChatCompletion.create(
@@ -154,7 +162,6 @@ def generate_response(openai_api_key, query_text, candidates_info):
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
 
-
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
@@ -165,6 +172,7 @@ if send_user_query:
         with st.spinner('Chatbot is typing...'):
             # Add the user query to the conversation history
             st.session_state.conversation_history.append({'role': 'user', 'content': user_query})
+            
             # Get the updated conversation history
             conversation_history = st.session_state.conversation_history.copy()
             # Append the uploaded resumes' content to the conversation history
@@ -173,7 +181,6 @@ if send_user_query:
             response = generate_response(openai_api_key, user_query, candidates_info)
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': response})
-
 
 # Chat UI with sticky headers and input prompt
 st.markdown("""
