@@ -16,20 +16,16 @@ import spacy
 import cohere
 import sqlite3
 from database import create_connection, create_resumes_table, insert_resume, get_all_resumes
-import numpy as np
-from scipy.spatial.distance import cosine
-from sentence_transformers import SentenceTransformer
-import torch
-from datetime import datetime
-# Set up your OpenAI API key from Streamlit secrets
+
+
 # Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 cohere_api_key = st.secrets["COHERE_API_KEY"]
-
 # Connect to the database and create the table
 database_name = "resumes.db"
 connection = create_connection(database_name)
 create_resumes_table(connection)
+
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -67,16 +63,6 @@ def extract_candidate_name(resume_text):
             break
     return candidate_name
 
-def extract_experience_dates(resume_text):
-    # Use regular expressions to extract experience dates from the resume text
-    date_pattern = r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b"  # Assumes dates in the format DD/MM/YYYY
-    experience_dates = re.findall(date_pattern, resume_text)
-
-    # Convert the extracted dates to datetime objects
-    experience_dates = [datetime(int(year), int(month), int(day)) for day, month, year in experience_dates]
-
-    return experience_dates
-
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -99,122 +85,80 @@ if uploaded_files:
             email = extract_email(resume_text)
             # Extract candidate name using spaCy NER
             candidate_name = extract_candidate_name(resume_text)
-            # Calculate years of experience
-            experience_dates = extract_experience_dates(resume_text)
-            # Check if there are any experience dates before calculating the oldest and latest
-            if experience_dates:
-                oldest_experience_date = min(experience_dates)
-                latest_experience_date = max(experience_dates)
-                years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
-            else:
-                # If no experience dates are found, set years_of_experience to None
-                years_of_experience = None
             # Store the information for each candidate
             candidate_info = {
                 'name': candidate_name,
                 'gpa': gpa,
                 'email': email,
-                'resume_text': resume_text,
-                'years_of_experience': years_of_experience
+                'resume_text': resume_text
             }
             candidates_info.append(candidate_info)
             # Store the resume and information in the database
             insert_resume(connection, candidate_info)
 
-def get_vector_embedding(texts):
+
+def summarize_text_batch(texts):
+    # Use a text summarization model to summarize the text within the specified token limit.
     co = cohere.Client(cohere_api_key)
-    response = co.embed(
-        texts=texts,
-        model='embed-english-v2.0',
-    )
-    embeddings = response['embeddings']
-    return embeddings
+    batch_size = 4  # You can adjust this batch size as needed
+    summarized_texts = []
 
-# Calculate and store vector embeddings for each candidate
-# Group texts for all candidates and then pass them to the get_vector_embedding function
-texts_for_embedding = [candidate_info["summarized_resume_text"] for candidate_info in candidates_info]
-embeddings = get_vector_embedding(texts_for_embedding)
+    for i in range(0, len(texts), batch_size):
+        batch_texts = texts[i:i + batch_size]
+        batch_summaries = co.summarize_batch(
+            model='summarize-xlarge', 
+            length='long',
+            extractiveness='high',
+            format='paragraph',
+            temperature=0.2,
+            additional_command='Generate a summary for this resume',
+            texts=batch_texts
+        )
+        summarized_texts.extend(batch_summaries)
 
-# Assign the embeddings to the respective candidate_info dictionaries
-for idx, candidate_info in enumerate(candidates_info):
-    candidate_info["embedding"] = embeddings[idx]
+    return summarized_texts
 
-# Update the database with the embeddings for each candidate
-for candidate_info in candidates_info:
-    name = candidate_info["name"]
-    embedding = candidate_info["embedding"]
-    update_embeddings(connection, name, embedding)
-
-# Function to retrieve vector embeddings from the database
-def get_candidate_embedding(candidate_name):
-    cursor = connection.cursor()
-    cursor.execute("SELECT embedding FROM resumes WHERE name=?", (candidate_name,))
-    result = cursor.fetchone()
-    cursor.close()
-    if result:
-        return np.frombuffer(result[0])
-    return None
-
-# Update the generate_response function to use vector embeddings from the database
 def generate_response(openai_api_key, query_text, candidates_info):
     # Load document if file is uploaded
     if len(candidates_info) > 0:
         # Prepare the conversation history with user query
         conversation_history = [{'role': 'user', 'content': query_text}]
 
-        # Process each resume separately and store the summaries in candidates_info
-        for idx, candidate_info in enumerate(candidates_info):
-            resume_text = candidate_info["resume_text"]
-            # Summarize each resume text to fit within the token limit
-            max_tokens = 4096  # Adjust this token limit as needed
-            summarized_resume_text = summarize_text(resume_text)
-            candidates_info[idx]["summarized_resume_text"] = summarized_resume_text
+        # Process resumes and store the summaries in candidates_info
+        resume_texts = [candidate_info["resume_text"] for candidate_info in candidates_info]
+        summarized_resumes = summarize_text_batch(resume_texts)
 
-            # Append the summarized resume text to the conversation history
+        for idx, summarized_resume_text in enumerate(summarized_resumes):
+            candidates_info[idx]["summarized_resume_text"] = summarized_resume_text
             conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {summarized_resume_text}'})
 
-        # Use vector embeddings to represent desired qualifications and experience levels
-        desired_qualifications = "Linux, React, MVP"  # Replace this with the desired qualifications
-        desired_experience = 3  # Replace this with the desired minimum years of experience
 
-        # Convert the desired qualifications and experience levels to vector representations
-        desired_qualifications_vector = get_vector_embedding(desired_qualifications)
-        desired_experience_vector = np.array([desired_experience])
+       # Use GPT-3.5-turbo for recruiter assistant tasks based on prompts
+        recruiter_prompts = {
+            "compare_candidates": "Please compare the candidates based on their qualifications and experience.",
+            "top_candidates": "Can you suggest the top candidates for the position based on if they possess a minimum of 3 years of experience in Linux, React, MVP, etc. Or similar qualifications",
+            "identify_strengths": "Identify the strengths of each candidate and their suitability for the role.",
+            "evaluate_experience": "Evaluate the past experiences of the candidates and their relevance to the job.",
+        }
 
-        # Calculate the similarity score for each candidate based on qualifications and experience
-        similarity_scores = []
-        for candidate_info in candidates_info:
-            candidate_embedding = get_candidate_embedding(candidate_info["name"])
-            if candidate_embedding is None:
-                continue
+        # Add a prompt for the specific query provided by the user
+        if query_text in recruiter_prompts:
+            conversation_history.append({'role': 'user', 'content': recruiter_prompts[query_text]})
 
-            # Convert candidate's qualifications and experience to vector representations
-            candidate_qualifications_vector = candidate_embedding
-            candidate_experience_vector = np.array([candidate_info["years_of_experience"]])
-
-            # Calculate the cosine similarity between the candidate and desired vectors
-            qualification_similarity = 1 - cosine(desired_qualifications_vector, candidate_qualifications_vector)
-            experience_similarity = 1 - cosine(desired_experience_vector, candidate_experience_vector)
-
-            # Combine qualification and experience similarity scores
-            overall_similarity = (qualification_similarity + experience_similarity) / 2
-            similarity_scores.append(overall_similarity)
-
-        # Find the top candidates based on similarity scores
-        num_top_candidates = 3  # You can choose the number of top candidates to display
-        top_candidate_indices = np.argsort(similarity_scores)[-num_top_candidates:]
-        top_candidates = [candidates_info[idx] for idx in top_candidate_indices][::-1]
-
-        # Generate the response with the top candidates
-        response = f"Top {num_top_candidates} candidates based on qualifications and experience:\n"
-        for rank, candidate in enumerate(top_candidates, 1):
-            response += f"{rank}. {candidate['name']} - Qualification Score: {similarity_scores[top_candidate_indices[rank - 1]]:.2f}\n"
-
-        return response
+        # Generate the response using the updated conversation history
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=conversation_history,
+            api_key=openai_api_key
+        )
+        # Get the assistant's response
+        assistant_response = response['choices'][0]['message']['content']
+        return assistant_response
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
-        
+
+
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
@@ -230,7 +174,7 @@ if send_user_query:
             # Append the uploaded resumes' content to the conversation history
             conversation_history.extend([{'role': 'system', 'content': resume_text} for resume_text in uploaded_resumes])
             # Generate the response using the updated conversation history
-            response = generate_response(openai_api_key, user_query, conversation_history)
+            response = generate_response(openai_api_key, user_query, candidates_info)
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': response})
 
