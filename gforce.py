@@ -124,7 +124,7 @@ def generate_response(openai_api_key, job_title, qualifications, user_query, can
 
         response = response['choices'][0]['message']['content']
 
-    return responsese
+    return response
 
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
