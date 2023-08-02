@@ -77,15 +77,7 @@ def extract_experience_dates(resume_text):
 
     return experience_dates
 
-# Function to retrieve vector embeddings from the database
-def get_candidate_embedding(candidate_name):
-    cursor = connection.cursor()
-    cursor.execute("SELECT embedding FROM resumes WHERE name=?", (candidate_name,))
-    result = cursor.fetchone()
-    cursor.close()
-    if result:
-        return np.frombuffer(result[0])
-    return None
+
 
 # Function to summarize the text using Cohere API
 def summarize_text(text):
@@ -165,20 +157,6 @@ for candidate_info in candidates_info:
     embedding = get_vector_embedding(text)
     # Store the embedding in the database
     update_embeddings(connection, candidate_info["name"], embedding)
-
-def summarize_text(text):
-    # Use a text summarization model to summarize the text within the specified token limit.
-    co = cohere.Client(cohere_api_key)
-    summarized_text = co.summarize(
-        model='summarize-medium', 
-        length='long',
-        extractiveness='high',
-        format='paragraph',
-        temperature= 0.2,
-        additional_command='Generate a summary for this resume',
-        text=text
-    )
-    return summarized_text
 
 # Function to retrieve vector embeddings from the database
 def get_candidate_embedding(candidate_name):
