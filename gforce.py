@@ -108,8 +108,8 @@ def summarize_text(text):
         extractiveness='high',
         format='paragraph',
         temperature= 0.2,
-        text=text,
-        additional_command = 'Generate a summary for this resume'
+        additional_command = 'Generate a summary for this resume',
+        text= text
     )
     return summarized_text
 
