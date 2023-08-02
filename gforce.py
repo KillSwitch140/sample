@@ -122,7 +122,7 @@ if uploaded_files:
             insert_resume(connection, candidate_info)
 
 # Function to get vector embeddings using Cohere API
-def get_vector_embedding(batch):
+def get_vector_embedding(batch: tuple):
     # Get embeddings for each chunk
     co = cohere.Client(cohere_api_key)
     response = co.embed(
