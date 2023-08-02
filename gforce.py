@@ -3,7 +3,7 @@ import PyPDF2
 import re
 import spacy
 import openai
-from database import create_connection, create_resumes_table, insert_resume, get_all_resumes
+from database import create_connection, create_resumes_table, insert_resume, get_all_resumes, get_candidate_email
 
 # Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
