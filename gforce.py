@@ -101,9 +101,14 @@ if uploaded_files:
             candidate_name = extract_candidate_name(resume_text)
             # Calculate years of experience
             experience_dates = extract_experience_dates(resume_text)
-            oldest_experience_date = min(experience_dates)
-            latest_experience_date = max(experience_dates)
-            years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
+           # Check if there are any experience dates before calculating the oldest and latest
+            if experience_dates:
+                oldest_experience_date = min(experience_dates)
+                latest_experience_date = max(experience_dates)
+                years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
+            else:
+                # If no experience dates are found, set years_of_experience to None
+                years_of_experience = None
             # Store the information for each candidate
             candidate_info = {
                 'name': candidate_name,
