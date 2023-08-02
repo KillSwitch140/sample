@@ -14,4 +14,4 @@ transformers
 numpy
 scipy
 tensorflow
-tensoreflow-hub
+tensorflow-hub
