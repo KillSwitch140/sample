@@ -114,16 +114,10 @@ def generate_response(openai_api_key, job_title, qualifications, user_query, can
     elif "email" in user_query.lower():
         candidate_name = extract_candidate_name(user_query)
         if candidate_name:
-            # Query the database to get the candidate's email
-            query = f"SELECT email FROM resumes WHERE name = '{candidate_name}'"
-            cursor = connection.cursor()
-            cursor.execute(query)
-            email_result = cursor.fetchone()
-            cursor.close()
+            # Get the candidate's email from the database
+            email = get_candidate_email(connection, candidate_name)
 
-            if email_result:
-                # The email_result is a tuple with a single element (the email value)
-                email = email_result[0]
+            if email:
                 response = f"The email for {candidate_name} is {email}."
             else:
                 response = f"Sorry, the email for {candidate_name} is not available."
