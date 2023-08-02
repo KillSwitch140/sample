@@ -88,9 +88,6 @@ for candidate_info in candidates_info:
     # Calculate years of experience
     years_of_experience = (latest_experience_date - oldest_experience_date).days / 365
 
-    # Store years_of_experience in the candidate_info dictionary
-    candidate_info["years_of_experience"] = years_of_experience
-
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -119,6 +116,7 @@ if uploaded_files:
                 'gpa': gpa,
                 'email': email,
                 'resume_text': resume_text
+                'years_of_experience': years_of_experience
             }
             candidates_info.append(candidate_info)
             # Store the resume and information in the database
