@@ -120,20 +120,19 @@ if uploaded_files:
             insert_resume(connection, candidate_info)
 
 # Function to embed the resume text using LangChain functions
-def embed_resume_text(resume_text, openai_api_key):
-    documents = [resume_text]
+def embed_resume_text(text, openai_api_key):
     # Split documents into chunks
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-    texts = text_splitter.create_documents(documents)
+    texts = text_splitter.create_documents([text])
     # Select embeddings
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    # Create a vectorstore from documents
+    # Create a vector store from documents
     db = Chroma.from_documents(texts, embeddings)
     # Create retriever interface
-    retriever = db.as_retriever()
-    # Create QA chain
-    qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key), chain_type='stuff', retriever=retriever)
-    return qa.run(resume_text)
+    retriever = RetrievalQA.Retriever.from_store(db)
+    # Embed resume text
+    embedded_text = retriever.embed(text)
+    return embedded_text
 
 
 def generate_response(openai_api_key, query_text, candidates_info):
