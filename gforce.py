@@ -85,9 +85,6 @@ st.title('GForce Resume Reader')
 uploaded_resumes = []
 candidates_info = []
 
-# Load the OpenAI LLM model
-qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key), chain_type='stuff')
-
 # File upload
 uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
 
