@@ -103,6 +103,11 @@ def summarize_text(text):
     # Use a text summarization model to summarize the text within the specified token limit.
     co = cohere.Client(cohere_api_key)
     summarized_text = co.summarize(
+        model='summarize-xlarge', 
+        length='long',
+        extractiveness='high',
+        format='paragraph',
+        temperature= 0.2
         text=text,
     )
     return summarized_text
