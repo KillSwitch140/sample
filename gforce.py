@@ -121,50 +121,29 @@ if uploaded_files:
             # Store the resume and information in the database
             insert_resume(connection, candidate_info)
 
-# Function to get vector embeddings using Cohere API
-def get_vector_embedding(batch: tuple):
-    # Get embeddings for each chunk
+def get_vector_embedding(texts):
     co = cohere.Client(cohere_api_key)
     response = co.embed(
-        texts=batch,
+        texts=texts,
         model='embed-english-v2.0',
     )
     embeddings = response['embeddings']
-
     return embeddings
 
 # Calculate and store vector embeddings for each candidate
-batch_size = 96
-batch = []
-batch_ids = []
-vectors = []
-vector_ids = []
+# Group texts for all candidates and then pass them to the get_vector_embedding function
+texts_for_embedding = [candidate_info["summarized_resume_text"] for candidate_info in candidates_info]
+embeddings = get_vector_embedding(texts_for_embedding)
 
-for i, candidate_info in enumerate(candidates_info):
-    if i % 500 == 0:
-        print(f"{i/len(candidates_info) * 100:.2f}%")
+# Assign the embeddings to the respective candidate_info dictionaries
+for idx, candidate_info in enumerate(candidates_info):
+    candidate_info["embedding"] = embeddings[idx]
 
-    resume_text = candidate_info["resume_text"]
-    if len(resume_text) > 5:
-        batch_ids.append(i)
-        batch.append(resume_text)
-
-    if len(batch) >= batch_size:
-        embeddings = get_vector_embedding(batch)
-        vectors.extend(embeddings)
-        vector_ids.extend(batch_ids)
-        batch = []
-        batch_ids = []
-
-if len(batch) > 0:
-    embeddings = get_vector_embedding(batch)
-    vectors.extend(embeddings)
-    vector_ids.extend(batch_ids)
-
-# Store the embeddings in the database
-for i, embedding in zip(vector_ids, vectors):
-    candidate_name = candidates_info[i]["name"]
-    update_embeddings(connection, candidate_name, embedding)
+# Update the database with the embeddings for each candidate
+for candidate_info in candidates_info:
+    name = candidate_info["name"]
+    embedding = candidate_info["embedding"]
+    update_embeddings(connection, name, embedding)
 
 # Function to retrieve vector embeddings from the database
 def get_candidate_embedding(candidate_name):
