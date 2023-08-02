@@ -16,7 +16,10 @@ import spacy
 import cohere
 import sqlite3
 from database import create_connection, create_resumes_table, insert_resume, get_all_resumes
-
+import numpy as np
+from scipy.spatial.distance import cosine
+from sentence_transformers import SentenceTransformer
+import torch
 
 # Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -96,6 +99,22 @@ if uploaded_files:
             # Store the resume and information in the database
             insert_resume(connection, candidate_info)
 
+# Load a pre-trained sentence transformer model
+model_name = "bert-base-nli-mean-tokens"
+model = SentenceTransformer(model_name)
+
+def get_vector_embedding(text):
+    # Encode the text into a vector representation
+    embeddings = model.encode(text, convert_to_tensor=True)
+
+    # Take the mean of all token embeddings to get the sentence-level embedding
+    sentence_embedding = torch.mean(embeddings, dim=0)
+
+    # Convert the torch tensor to a numpy array
+    sentence_embedding = sentence_embedding.detach().numpy()
+
+    return sentence_embedding
+
 
 def summarize_text(text):
     # Use a text summarization model to summarize the text within the specified token limit.
@@ -110,6 +129,7 @@ def summarize_text(text):
         text= text
     )
     return summarized_text
+
 
 def generate_response(openai_api_key, query_text, candidates_info):
     # Load document if file is uploaded
@@ -128,27 +148,40 @@ def generate_response(openai_api_key, query_text, candidates_info):
             # Append the summarized resume text to the conversation history
             conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {summarized_resume_text}'})
 
-       # Use GPT-3.5-turbo for recruiter assistant tasks based on prompts
-        recruiter_prompts = {
-            "compare_candidates": "Please compare the candidates based on their qualifications and experience.",
-            "top_candidates": "Can you suggest the top candidates for the position based on if they possess a minimum of 3 years of experience in Linux, React, MVP, etc. Or similar qualifications",
-            "identify_strengths": "Identify the strengths of each candidate and their suitability for the role.",
-            "evaluate_experience": "Evaluate the past experiences of the candidates and their relevance to the job.",
-        }
+        # Use vector embeddings to represent desired qualifications and experience levels
+        desired_qualifications = "Linux, React, MVP"  # Replace this with the desired qualifications
+        desired_experience = 3  # Replace this with the desired minimum years of experience
 
-        # Add a prompt for the specific query provided by the user
-        if query_text in recruiter_prompts:
-            conversation_history.append({'role': 'user', 'content': recruiter_prompts[query_text]})
+        # Convert the desired qualifications and experience levels to vector representations
+        desired_qualifications_vector = get_vector_embedding(desired_qualifications)
+        desired_experience_vector = np.array([desired_experience])
 
-        # Generate the response using the updated conversation history
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=conversation_history,
-            api_key=openai_api_key
-        )
-        # Get the assistant's response
-        assistant_response = response['choices'][0]['message']['content']
-        return assistant_response
+        # Calculate the similarity score for each candidate based on qualifications and experience
+        similarity_scores = []
+        for candidate_info in candidates_info:
+            # Convert candidate's qualifications and experience to vector representations
+            candidate_qualifications_vector = get_vector_embedding(candidate_info["summarized_resume_text"])
+            candidate_experience_vector = np.array([candidate_info["years_of_experience"]])
+
+            # Calculate the cosine similarity between the candidate and desired vectors
+            qualification_similarity = 1 - cosine(desired_qualifications_vector, candidate_qualifications_vector)
+            experience_similarity = 1 - cosine(desired_experience_vector, candidate_experience_vector)
+
+            # Combine qualification and experience similarity scores
+            overall_similarity = (qualification_similarity + experience_similarity) / 2
+            similarity_scores.append(overall_similarity)
+
+        # Find the top candidates based on similarity scores
+        num_top_candidates = 3  # You can choose the number of top candidates to display
+        top_candidate_indices = np.argsort(similarity_scores)[-num_top_candidates:]
+        top_candidates = [candidates_info[idx] for idx in top_candidate_indices][::-1]
+
+        # Generate the response with the top candidates
+        response = f"Top {num_top_candidates} candidates based on qualifications and experience:\n"
+        for rank, candidate in enumerate(top_candidates, 1):
+            response += f"{rank}. {candidate['name']} - Qualification Score: {similarity_scores[top_candidate_indices[rank - 1]]:.2f}\n"
+
+        return response
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
