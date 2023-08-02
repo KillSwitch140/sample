@@ -144,18 +144,24 @@ if uploaded_files:
 # Function to get vector embeddings using Cohere API
 def get_vector_embedding(text):
     co = cohere.Client(cohere_api_key)
-    response = co.embed(
-        texts=[text],
-        model='embed-english-v2.0',
-    )
-    embedding = response['embeddings'][0]
-    return embedding
+    # Split the text into smaller chunks of max 512 tokens
+    chunked_texts = [text[i:i + 512] for i in range(0, len(text), 512)]
+    embeddings = []
+    # Call the embed API for each chunk
+    for chunk in chunked_texts:
+        response = co.embed(
+            texts=[chunk],
+            model='embed-english-v2.0',
+        )
+        embeddings.extend(response['embeddings'])
+
+    return embeddings
 
 # Calculate and store vector embeddings for each candidate
 for candidate_info in candidates_info:
     text = candidate_info["summarized_resume_text"]
     embedding = get_vector_embedding(text)
-    # Store the embedding in the database
+    # Store the embedding in the database (Note: This will overwrite previous embeddings if any)
     update_embeddings(connection, candidate_info["name"], embedding)
 
 # Function to retrieve vector embeddings from the database
