@@ -88,7 +88,6 @@ candidates_info = []
 # File upload
 uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
 
-# Process uploaded resumes and store in the database
 if uploaded_files:
     for uploaded_file in uploaded_files:
         if uploaded_file is not None:
@@ -101,7 +100,7 @@ if uploaded_files:
             candidate_name = extract_candidate_name(resume_text)
             # Calculate years of experience
             experience_dates = extract_experience_dates(resume_text)
-           # Check if there are any experience dates before calculating the oldest and latest
+            # Check if there are any experience dates before calculating the oldest and latest
             if experience_dates:
                 oldest_experience_date = min(experience_dates)
                 latest_experience_date = max(experience_dates)
@@ -109,12 +108,15 @@ if uploaded_files:
             else:
                 # If no experience dates are found, set years_of_experience to None
                 years_of_experience = None
+            # Summarize the resume text
+            summarized_resume_text = summarize_text(resume_text)
             # Store the information for each candidate
             candidate_info = {
                 'name': candidate_name,
                 'gpa': gpa,
                 'email': email,
                 'resume_text': resume_text,
+                'summarized_resume_text': summarized_resume_text,
                 'years_of_experience': years_of_experience
             }
             candidates_info.append(candidate_info)
