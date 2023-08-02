@@ -37,10 +37,10 @@ def insert_resume(connection, candidate_info):
     """
     cursor = connection.cursor()
     cursor.execute(insert_query, (
-        candidate_info["name"],
-        candidate_info["gpa"],
-        candidate_info["email"],
-        candidate_info["resume_text"]
+        candidate_info.get("name"),
+        candidate_info.get("gpa"),
+        candidate_info.get("email"),
+        candidate_info.get("resume_text")
     ))
     connection.commit()
     cursor.close()
