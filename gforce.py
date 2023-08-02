@@ -54,13 +54,25 @@ if "conversation_history" not in st.session_state:
 
 # Function to extract candidate name using spaCy NER
 def extract_candidate_name(resume_text):
+    # Assume the candidate name is in the first line of the resume text
+    first_line = resume_text.strip().split('\n')[0]
+    
+    # Initialize spaCy NER model
     nlp = spacy.load("en_core_web_sm")
-    doc = nlp(resume_text)
+    
+    # Process the first line with spaCy NER
+    doc = nlp(first_line)
     candidate_name = None
+    
     for ent in doc.ents:
         if ent.label_ == "PERSON":
             candidate_name = ent.text
             break
+
+    # If spaCy NER did not find a PERSON entity in the first line, use the entire first line as the candidate name
+    if not candidate_name:
+        candidate_name = first_line.strip()
+        
     return candidate_name
 
 # Page title and styling
@@ -97,27 +109,6 @@ if uploaded_files:
             insert_resume(connection, candidate_info)
 
 
-def summarize_text_batch(texts):
-    # Use a text summarization model to summarize the text within the specified token limit.
-    co = cohere.Client(cohere_api_key)
-    batch_size = 4  # You can adjust this batch size as needed
-    summarized_texts = []
-
-    for i in range(0, len(texts), batch_size):
-        batch_texts = texts[i:i + batch_size]
-        batch_summaries = co.summarize_batch(
-            model='summarize-xlarge', 
-            length='long',
-            extractiveness='high',
-            format='paragraph',
-            temperature=0.2,
-            additional_command='Generate a summary for this resume',
-            texts=batch_texts
-        )
-        summarized_texts.extend(batch_summaries)
-
-    return summarized_texts
-
 def generate_response(openai_api_key, query_text, candidates_info):
     # Load document if file is uploaded
     if len(candidates_info) > 0:
@@ -125,13 +116,18 @@ def generate_response(openai_api_key, query_text, candidates_info):
         conversation_history = [{'role': 'user', 'content': query_text}]
 
         # Process resumes and store the summaries in candidates_info
-        resume_texts = [candidate_info["resume_text"] for candidate_info in candidates_info]
-        summarized_resumes = summarize_text_batch(resume_texts)
+        for idx, candidate_info in enumerate(candidates_info):
+            resume_text = candidate_info["resume_text"]
+            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
 
-        for idx, summarized_resume_text in enumerate(summarized_resumes):
-            candidates_info[idx]["summarized_resume_text"] = summarized_resume_text
-            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {summarized_resume_text}'})
 
+        # Check if the user query is related to selecting candidates based on qualifications
+        if "recommend candidate" in query_text.lower() and any(keyword in query_text.lower() for keyword in ["linux", "react", "mvp"]):
+            # Add a prompt for selecting candidates based on qualifications
+            prompt = "Based on the qualifications of experience in Linux, React, MVP, etc., please choose the candidate with the same or similar qualifications."
+
+            # Append the prompt to the conversation history
+            conversation_history.append({'role': 'user', 'content': prompt})
 
        # Use GPT-3.5-turbo for recruiter assistant tasks based on prompts
         recruiter_prompts = {
