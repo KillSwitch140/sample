@@ -11,3 +11,5 @@ cohere
 torch
 sentence_transformers
 transformers
+numpy
+scipy
