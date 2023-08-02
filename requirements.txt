@@ -13,3 +13,5 @@ sentence_transformers
 transformers
 numpy
 scipy
+tensorflow
+tensoreflow-hub
