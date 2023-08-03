@@ -15,6 +15,11 @@ def read_pdf_text(uploaded_file):
 
     return text
 
+# Initialize conversation history in session state
+if "conversation_history" not in st.session_state:
+    st.session_state.conversation_history = [{'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'}]
+
+
 # Function to prompt GPT-3.5-turbo with user query
 def generate_response(openai_api_key, user_query, conversation_history):
     response = openai.ChatCompletion.create(
