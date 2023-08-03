@@ -4,7 +4,8 @@ import PyPDF2
 import re
 import spacy
 import openai
-from database import create_connection, create_resumes_table, insert_resume, get_all_resumes,get_candidate_info_from_database
+from transformers import pipeline
+from database import create_connection, create_resumes_table, insert_resume, get_all_resumes, get_candidate_info_from_database
 
 # Set up your OpenAI API key from Streamlit secrets
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -14,6 +15,12 @@ database_name = "resumes.db"
 connection = create_connection(database_name)
 create_resumes_table(connection)
 
+# Load NER and NEL models
+nlp_ner = spacy.load("en_core_web_sm")
+nlp_nel = pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-english", tokenizer="dbmdz/bert-large-cased-finetuned-conll03-english")
+
+# Load Question Answering model
+nlp_qa = pipeline("question-answering", model="deepset/roberta-base-squad2")
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -24,23 +31,16 @@ def read_pdf_text(uploaded_file):
 
     return text
 
-# Function to extract GPA using regular expression
 def extract_gpa(text):
     gpa_pattern = r"\bGPA\b\s*:\s*([\d.]+)"
     gpa_match = re.search(gpa_pattern, text, re.IGNORECASE)
     return gpa_match.group(1) if gpa_match else None
 
-# Function to extract email using regular expression
 def extract_email(text):
     email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
     email_match = re.search(email_pattern, text)
     return email_match.group() if email_match else None
 
-# Initialize conversation history in session state
-if "conversation_history" not in st.session_state:
-    st.session_state.conversation_history = []
-
-# Function to extract candidate name using spaCy NER
 def extract_candidate_name(resume_text):
     nlp = spacy.load("en_core_web_sm")
     doc = nlp(resume_text)
@@ -51,87 +51,74 @@ def extract_candidate_name(resume_text):
             break
     return candidate_name
 
-# Page title and styling
-st.set_page_config(page_title='GForce Resume Reader', layout='wide')
-st.title('GForce Resume Reader')
+if "conversation_history" not in st.session_state:
+    st.session_state.conversation_history = []
 
-# Ask the user for job details as soon as they upload resumes
-job_title = st.sidebar.text_input("Enter the job title:")
-qualifications = st.sidebar.text_area("Enter the qualifications for the job (separated by commas):")
+def extract_named_entities(text):
+    doc = nlp_ner(text)
+    named_entities = []
+    for ent in doc.ents:
+        named_entities.append({
+            "text": ent.text,
+            "label": ent.label_
+        })
+    return named_entities
 
-# Display job details in the sidebar
-st.sidebar.header('Job Details')
-st.sidebar.write(f'Job Title: {job_title}')
-st.sidebar.write(f'Qualifications: {qualifications}')
+def extract_named_entity_links(text):
+    entities = nlp_nel(text)
+    named_entity_links = []
+    for ent in entities:
+        named_entity_links.append({
+            "text": ent['word'],
+            "label": ent['entity'],
+            "url": ent['uri']
+        })
+    return named_entity_links
 
-# List to store uploaded resume contents and extracted information
-uploaded_resumes = []
-candidates_info = []
-
-# File upload
-uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
-
-# Process uploaded resumes and store in the database
-if uploaded_files:
-    for uploaded_file in uploaded_files:
-        if uploaded_file is not None:
-            resume_text = read_pdf_text(uploaded_file)
-            uploaded_resumes.append(resume_text)
-            # Extract GPA, email, and past
-            gpa = extract_gpa(resume_text)
-            email = extract_email(resume_text)
-            # Extract candidate name using spaCy NER
-            candidate_name = extract_candidate_name(resume_text)
-            # Store the information for each candidate
-            candidate_info = {
-                'name': candidate_name,
-                'gpa': gpa,
-                'email': email,
-                'resume_text': resume_text
-            }
-            candidates_info.append(candidate_info)
-            # Store the resume and information in the database
-            insert_resume(connection, candidate_info)
+def question_answering(question, context):
+    result = nlp_qa(question=question, context=context)
+    return result['answer']
 
 def generate_response(openai_api_key, query_text, candidates_info):
-    # Load document if file is uploaded
     if len(candidates_info) > 0:
-        # Prepare the conversation history with user query
         conversation_history = [{'role': 'user', 'content': query_text}]
-
-        # Process each resume separately and store the summaries in candidates_info
-        for idx, candidate_info in enumerate(candidates_info):
-            resume_text = candidate_info["resume_text"]
-            # Append the summarized resume text to the conversation history
-            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
-
-        # Extract candidate name from the query
         candidate_name = extract_candidate_name(query_text)
 
         if 'compare' in query_text.lower():
-            # Prepare the conversation history with user query and relevant candidate names
             conversation_history.append({'role': 'system', 'content': f'Candidate 1: {candidates_info[0]["name"]}'})
             conversation_history.append({'role': 'system', 'content': f'Candidate 2: {candidates_info[1]["name"]}'})
+        
         elif 'email' in query_text.lower() or 'gpa' in query_text.lower() or 'past experience' in query_text.lower():
-            # Prepare the conversation history with user query and candidate name
             conversation_history.append({'role': 'system', 'content': f'Candidate: {candidate_name}'})
 
-            # Fetch candidate information from the database based on the candidate's name
             candidate_info = get_candidate_info_from_database(candidate_name)
 
-            # Append the retrieved information to the conversation history
             conversation_history.append({'role': 'system', 'content': f'Candidate Info: {candidate_info}'})
 
-        # Generate the response using the updated conversation history
+            named_entities = extract_named_entities(candidate_info['resume_text'])
+            named_entity_links = extract_named_entity_links(candidate_info['resume_text'])
+            conversation_history.append({'role': 'system', 'content': f'Named Entities: {named_entities}'})
+            conversation_history.append({'role': 'system', 'content': f'Named Entity Links: {named_entity_links}'})
+            
+            if 'experience' in query_text.lower():
+                conversation_history.append({'role': 'system', 'content': f'Candidate: {candidate_name}, tell me about your past experience.'})
+        
+        else:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=conversation_history,
+                api_key=openai_api_key
+            )
+            assistant_response = response['choices'][0]['message']['content']
+            return assistant_response
+        
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=conversation_history,
             api_key=openai_api_key
         )
-        # Get the assistant's response
         assistant_response = response['choices'][0]['message']['content']
 
-        # Ensure the assistant's response explicitly states the candidate's name
         if candidate_name and candidate_name not in assistant_response:
             corrected_response = f"I apologize, I provided information about the wrong candidate. Let me clarify. {candidate_name}'s " + assistant_response
             return corrected_response
