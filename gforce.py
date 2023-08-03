@@ -35,7 +35,7 @@ def get_text_chunks(text):
         chunk_overlap=200,
         length_function=len
     )
-    chunks = text_splitter.split_text(text)
+    chunks = text_splitter.create_documents(text)
     return chunks
 
 
