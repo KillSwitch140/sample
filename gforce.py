@@ -5,7 +5,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
+from langchain.prompts import ChatPromptTemplate
 import pysqlite3
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
@@ -23,16 +23,16 @@ def read_pdf_text(uploaded_file):
  
 
 def generate_response(doc_texts, openai_api_key, query_text):
-
+    style= " Professional, polite and respectful tone"
     system_message = "You are a hiring manager's helpful assistant that reads multiple resumes of candidates and answers any questions related to the candidates,\
-                        You are professional chatbot\
+                        You are chatbot that talks in a {style} \
                         Only answer the quesions truthfully and accurate do not provide further details.\
                         If you don't know the answer, just say that you don't know, don't try to make up an answer.\
                         If you are asked to summarize a candidate'sresume, summarize it in 5 sentences, 3 sentences for their experience and projects, 1 sentence for their education and 1 sentence for their skills\
                         If you are asked to compare candidates just provide the summarization of their resumes\
                         "
-    prompt = create_prompt(system_message=system_message)
-
+    prompt = ChatPromptTemplate.from_template(system_message)
+    Recruiter_bot = prompt.format_messages(style = style)
     # Split documents into chunks
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.create_documents(doc_texts)
