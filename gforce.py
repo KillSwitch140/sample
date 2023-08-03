@@ -19,7 +19,6 @@ def read_pdf_text(uploaded_file):
 if "conversation_history" not in st.session_state:
     st.session_state.conversation_history = [{'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'}]
 
-
 # Function to prompt GPT-3.5-turbo with user query
 def generate_response(openai_api_key, user_query, conversation_history):
     response = openai.ChatCompletion.create(
@@ -34,10 +33,6 @@ def generate_response(openai_api_key, user_query, conversation_history):
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
 
-# Initialize conversation history in session state
-if "conversation_history" not in st.session_state:
-    st.session_state.conversation_history = [{'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'}]
-
 # Sidebar for job details
 st.sidebar.title('Job Details')
 job_title = st.sidebar.text_input("Enter the job title:")
@@ -48,7 +43,6 @@ uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accep
 
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
-
 
 # Form input and query
 send_user_query = st.button('Send', help='Click to submit the query', key="send_user_query")
