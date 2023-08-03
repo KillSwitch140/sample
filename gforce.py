@@ -65,9 +65,8 @@ if st.button('Submit', key='submit_button'):
     if openai_api_key.startswith('sk-'):
         if uploaded_files and query_text:
             documents = [read_pdf_text(file) for file in uploaded_files]
-            with st.spinner('Calculating...'):
+            with st.spinner('Chatbot is typing...'):
                 response = generate_response(documents, openai_api_key, query_text)
-                result.append(response)
                 st.session_state.messages.append({"role": "user", "content": query_text})
                 st.session_state.messages.append({"role": "assistant", "content": response})
         else:
