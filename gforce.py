@@ -122,11 +122,15 @@ def generate_response(openai_api_key, query_text, candidates_info):
             if candidate_info['name'] in mentioned_candidates
         ]
 
-        # Process each resume separately and store the summaries in filtered_candidates_info
-        for idx, candidate_info in enumerate(filtered_candidates_info):
-            resume_text = candidate_info["resume_text"]
-            # Append the summarized resume text to the conversation history
-            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
+        if filtered_candidates_info:
+            # Process each resume separately and store the summaries in filtered_candidates_info
+            for idx, candidate_info in enumerate(filtered_candidates_info):
+                resume_text = candidate_info["resume_text"]
+                # Append the summarized resume text to the conversation history
+                conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
+        else:
+            # No candidates mentioned, inform the user
+            conversation_history.append({'role': 'system', 'content': "I'm sorry, but I don't have access to that candidate's information."})
 
         # Generate the response using the updated conversation history
         response = openai.ChatCompletion.create(
@@ -140,6 +144,7 @@ def generate_response(openai_api_key, query_text, candidates_info):
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
+
 
 
 
