@@ -103,7 +103,7 @@ def generate_response(openai_api_key, query_text, candidates_info):
         for idx, candidate_info in enumerate(candidates_info):
             resume_text = candidate_info["resume_text"]
             # Append the summarized resume text to the conversation history
-            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
+            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'},{'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'})
 
 
         # Generate the response using the updated conversation history
