@@ -105,6 +105,29 @@ def generate_response(openai_api_key, query_text, candidates_info):
             # Append the summarized resume text to the conversation history
             conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
 
+        # Use GPT-3.5-turbo for recruiter assistant tasks based on prompts
+        recruiter_prompts = {
+            "compare_candidates": "Please compare the candidates based on their qualifications and experience.",
+            "get_candidate_info": "Please provide the candidate information for resume {candidate_index}.",
+            "get_past_experience": "Please provide the past experience details for resume {candidate_index}.",
+        }
+
+        # Add a prompt for the specific query provided by the user
+        if query_text.startswith("compare"):
+            conversation_history.append({'role': 'user', 'content': recruiter_prompts["compare_candidates"]})
+        elif query_text.startswith("get"):
+            candidate_index = None
+            # Find the candidate index based on user input (e.g., A, B, C, D)
+            for i, candidate_info in enumerate(candidates_info):
+                if query_text.endswith(candidate_info['name']):
+                    candidate_index = i
+                    break
+
+            if candidate_index is not None:
+                conversation_history.append({'role': 'user', 'content': recruiter_prompts["get_candidate_info"].format(candidate_index=candidate_index + 1)})
+                conversation_history.append({'role': 'user', 'content': recruiter_prompts["get_past_experience"].format(candidate_index=candidate_index + 1)})
+            else:
+                return "Invalid candidate name. Please provide a valid candidate name (e.g., A, B, C, D)."
 
         # Generate the response using the updated conversation history
         response = openai.ChatCompletion.create(
@@ -118,6 +141,8 @@ def generate_response(openai_api_key, query_text, candidates_info):
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
+
+
 
 
 # User query
