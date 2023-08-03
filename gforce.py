@@ -32,11 +32,12 @@ from langchain.document_loaders import PyPDFLoader
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 def read_pdf(pdf_docs):
+    pdf_reader = PyPDF2.PdfReader(uploaded_file)
     text = ""
-    for pdf in pdf_docs:
-        pdf_reader = PdfReader(pdf)
-        for page in pdf_reader.pages:
-            text += page.extract_text()
+
+    for page in pdf_reader.pages:
+        text += page.extract_text()
+
     return text
 
 def get_text_chunks(file):
