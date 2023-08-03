@@ -51,19 +51,30 @@ def extract_candidate_name(resume_text):
             break
     return candidate_name
 
-# Function to extract candidate names mentioned in the user query using spaCy NER
-def extract_mentioned_candidates(query_text, candidates_info):
-    nlp = spacy.load("en_core_web_sm")
-    doc = nlp(query_text)
-    mentioned_candidates = set()
-    for ent in doc.ents:
-        if ent.label_ == "PERSON":
-            for candidate_info in candidates_info:
-                candidate_name = candidate_info['name']
-                if candidate_name and ent.text.lower() in candidate_name.lower():
-                    mentioned_candidates.add(candidate_name)
-    return mentioned_candidates
+def extract_candidate_info(user_query, candidates_info):
+    candidate_names = [candidate["name"].lower() for candidate in candidates_info]
+    user_query = user_query.lower()
+    response = None
 
+    for idx, candidate_name in enumerate(candidate_names):
+        if candidate_name in user_query:
+            candidate_info = candidates_info[idx]
+            response = f"Resume {idx + 1}: {candidate_name.title()} "
+
+            if "email" in user_query:
+                response += f"Email: {candidate_info['email']} "
+
+            if "gpa" in user_query:
+                response += f"GPA: {candidate_info['gpa']} "
+
+            # Add other information like qualifications, past experience, skills, etc.
+            # Example: if "experience" in user_query:
+            #              response += f"Experience: {candidate_info['experience']} "
+
+            response = response.strip()
+            break
+
+    return response
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -112,25 +123,26 @@ def generate_response(openai_api_key, query_text, candidates_info):
         # Prepare the conversation history with user query
         conversation_history = [{'role': 'user', 'content': query_text}]
 
-        # Extract candidate names mentioned in the query
-        mentioned_candidates = extract_mentioned_candidates(query_text, candidates_info)
+        # Process each resume separately and store the summaries in candidates_info
+        for idx, candidate_info in enumerate(candidates_info):
+            resume_text = candidate_info["resume_text"]
+            # Append the summarized resume text to the conversation history
+            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
 
-        # Filter candidates based on the mentioned names
-        filtered_candidates_info = [
-            candidate_info
-            for candidate_info in candidates_info
-            if candidate_info['name'] in mentioned_candidates
-        ]
-
-        if filtered_candidates_info:
-            # Process each resume separately and store the summaries in filtered_candidates_info
-            for idx, candidate_info in enumerate(filtered_candidates_info):
-                resume_text = candidate_info["resume_text"]
-                # Append the summarized resume text to the conversation history
-                conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
+        # Extract candidate information based on the user's query
+        candidate_info_response = extract_candidate_info(query_text, candidates_info)
+        if candidate_info_response:
+            conversation_history.append({'role': 'system', 'content': candidate_info_response})
         else:
-            # No candidates mentioned, inform the user
-            conversation_history.append({'role': 'system', 'content': "I'm sorry, but I don't have access to that candidate's information."})
+            # Use GPT-3.5-turbo for other prompts if the user's query is not about a specific candidate
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=conversation_history,
+                api_key=openai_api_key
+            )
+            # Get the assistant's response
+            assistant_response = response['choices'][0]['message']['content']
+            return assistant_response
 
         # Generate the response using the updated conversation history
         response = openai.ChatCompletion.create(
@@ -144,8 +156,6 @@ def generate_response(openai_api_key, query_text, candidates_info):
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
-
-
 
 
 # User query
@@ -166,14 +176,6 @@ if send_user_query:
             response = generate_response(openai_api_key, user_query, candidates_info)
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': response})
-
-# Add a clear conversation button
-clear_conversation = st.button('Clear Conversation', key="clear_conversation")
-if clear_conversation:
-    # Clear the conversation history and reset the session state
-    st.session_state.conversation_history.clear()
-    st.session_state.user_input = ""
-    st.session_state.send_user_query = False
 
 # Chat UI with sticky headers and input prompt
 st.markdown("""
@@ -233,5 +235,10 @@ if st.session_state.conversation_history:
             st.markdown(f'<div class="assistant-bubble"><div>{message["content"]}</div></div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
+
+clear_conversation = st.button('Clear Conversation', key="clear_conversation")
+if clear_conversation:
+    st.session_state.conversation_history.clear()
+    st.session_state.user_input = ""
 
 
