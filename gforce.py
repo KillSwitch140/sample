@@ -87,7 +87,7 @@ st.title('Gforce Resume Assistant')
 
 if "conversation" not in st.session_state:
         st.session_state.conversation = None
-    if "chat_history" not in st.session_state:
+if "chat_history" not in st.session_state:
         st.session_state.chat_history = None
 
     st.header("Chat with multiple PDFs :books:")
@@ -101,9 +101,6 @@ if "conversation" not in st.session_state:
             "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
         if st.button("Process"):
             with st.spinner("Processing"):
-                # get pdf text
-                raw_text = get_pdf_text(pdf_docs)
-
                 # get the text chunks
                 text_chunks = get_text_chunks(raw_text)
 
