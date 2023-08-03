@@ -105,6 +105,15 @@ def generate_response(openai_api_key, query_text, candidates_info):
             # Append the summarized resume text to the conversation history
             conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
 
+        # Extract candidate name from the query
+        candidate_name = extract_candidate_name(query_text)
+        
+        if 'compare' in query_text.lower():
+        # Prepare the conversation history with user query and relevant candidate names
+        conversation_history = [{'role': 'user', 'content': query_text}]
+        candidate_names = [candidate['name'] for candidate in candidates_info]
+        conversation_history.extend([{'role': 'system', 'content': f'Candidate {idx + 1}: {name}'} for idx, name in enumerate(candidate_names)])
+
         # Generate the response using the updated conversation history
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -113,18 +122,67 @@ def generate_response(openai_api_key, query_text, candidates_info):
         )
         # Get the assistant's response
         assistant_response = response['choices'][0]['message']['content']
-        
-        # Ensure the assistant's response explicitly states the candidate's name
-        candidate_name = extract_candidate_name(query_text)
-        if candidate_name:
-            if candidate_name in assistant_response:
-                return assistant_response
-            else:
-                # If the candidate's name is not mentioned, correct the response
-                corrected_response = f"I apologize, I provided information about the wrong candidate. Let me clarify. {candidate_name}'s " + assistant_response
-                return corrected_response
-
         return assistant_response
+
+    elif 'email' in query_text.lower():
+        # Prepare the conversation history with user query and candidate name
+        conversation_history = [{'role': 'user', 'content': query_text}]
+        conversation_history.append({'role': 'system', 'content': f'Candidate: {candidate_name}'})
+
+        # Generate the response using the updated conversation history
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=conversation_history,
+            api_key=openai_api_key
+        )
+        # Get the assistant's response
+        assistant_response = response['choices'][0]['message']['content']
+        return assistant_response
+
+    elif 'gpa' in query_text.lower():
+        # Prepare the conversation history with user query and candidate name
+        conversation_history = [{'role': 'user', 'content': query_text}]
+        conversation_history.append({'role': 'system', 'content': f'Candidate: {candidate_name}'})
+
+        # Generate the response using the updated conversation history
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=conversation_history,
+            api_key=openai_api_key
+        )
+        # Get the assistant's response
+        assistant_response = response['choices'][0]['message']['content']
+        return assistant_response
+
+    elif 'past experience' in query_text.lower():
+        # Prepare the conversation history with user query and candidate name
+        conversation_history = [{'role': 'user', 'content': query_text}]
+        conversation_history.append({'role': 'system', 'content': f'Candidate: {candidate_name}'})
+
+        # Generate the response using the updated conversation history
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=conversation_history,
+            api_key=openai_api_key
+        )
+        # Get the assistant's response
+        assistant_response = response['choices'][0]['message']['content']
+        return assistant_response
+
+     else:
+        # Handle other general queries or unknown tasks here
+        # You can use GPT-3.5-turbo to respond to these queries
+        conversation_history = [{'role': 'user', 'content': query_text}]
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=conversation_history,
+            api_key=openai_api_key
+        )
+        assistant_response = response['choices'][0]['message']['content']
+        return assistant_response
+        
+    
+
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
