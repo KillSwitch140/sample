@@ -31,14 +31,16 @@ from langchain.document_loaders import PyPDFLoader
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
-def read_pdf(uploaded_file):
-    pdf_reader = PyPDF2.PdfReader(uploaded_file)
+def read_pdf(uploaded_files):
     text = ""
 
-    for page in pdf_reader.pages:
-        text += page.extract_text()
+    for uploaded_file in uploaded_files:
+        pdf_reader = PyPDF2.PdfReader(uploaded_file)
+        for page in pdf_reader.pages:
+            text += page.extract_text()
 
     return text
+
 
 def get_text_chunks(file):
     text_splitter = CharacterTextSplitter(
