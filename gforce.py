@@ -53,7 +53,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     llm,
     retriever=retriever,
     return_source_documents=True,
-    chain_type_kwargs={"prompt": QA_CHAIN_PROMPT}
+    chain_type_kwargs={"prompt": Recruiter_bot }
     )
 
     # Generate response
