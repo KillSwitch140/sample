@@ -94,6 +94,28 @@ def extract_named_entity_links(text):
             named_entity_links.append(ent)
     return named_entity_links
 
+# Process uploaded resumes and store in the database
+if uploaded_files:
+    for uploaded_file in uploaded_files:
+        if uploaded_file is not None:
+            resume_text = read_pdf_text(uploaded_file)
+            uploaded_resumes.append(resume_text)
+            # Extract GPA, email, and past
+            gpa = extract_gpa(resume_text)
+            email = extract_email(resume_text)
+            # Extract candidate name using spaCy NER
+            candidate_name = extract_candidate_name(resume_text)
+            # Store the information for each candidate
+            candidate_info = {
+                'name': candidate_name,
+                'gpa': gpa,
+                'email': email,
+                'resume_text': resume_text
+            }
+            candidates_info.append(candidate_info)
+            # Store the resume and information in the database
+            insert_resume(connection, candidate_info)
+
 def generate_response(openai_api_key, query_text, candidates_info):
     if len(candidates_info) > 0:
         conversation_history = [{'role': 'user', 'content': query_text}]
