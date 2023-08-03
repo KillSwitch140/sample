@@ -17,10 +17,6 @@ create_resumes_table(connection)
 
 # Load NER and NEL models
 nlp_ner = spacy.load("en_core_web_sm")
-nlp_nel = pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-english", tokenizer="dbmdz/bert-large-cased-finetuned-conll03-english")
-
-# Load Question Answering model
-nlp_qa = pipeline("question-answering", model="deepset/roberta-base-squad2")
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -65,19 +61,17 @@ def extract_named_entities(text):
     return named_entities
 
 def extract_named_entity_links(text):
-    entities = nlp_nel(text)
+    # Simple keyword-based approach for Named Entity Linking (NEL)
+    entities = [
+        {"word": "John Doe", "entity": "PERSON", "uri": "https://example.com/john-doe"},
+        {"word": "Google", "entity": "ORG", "uri": "https://example.com/google"},
+        # Add more entities and URLs as needed
+    ]
     named_entity_links = []
     for ent in entities:
-        named_entity_links.append({
-            "text": ent['word'],
-            "label": ent['entity'],
-            "url": ent['uri']
-        })
+        if ent['word'].lower() in text.lower():
+            named_entity_links.append(ent)
     return named_entity_links
-
-def question_answering(question, context):
-    result = nlp_qa(question=question, context=context)
-    return result['answer']
 
 def generate_response(openai_api_key, query_text, candidates_info):
     if len(candidates_info) > 0:
@@ -127,6 +121,7 @@ def generate_response(openai_api_key, query_text, candidates_info):
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
+
 
 
 # User query
