@@ -110,7 +110,7 @@ def main():
         if st.button("Process"):
             with st.spinner("Processing"):
                # get pdf text
-                raw_text = get_pdf_text(pdf_docs)
+                raw_text = read_pdf(pdf_docs)
 
                 # get the text chunks
                 text_chunks = get_text_chunks(raw_text)
