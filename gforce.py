@@ -79,6 +79,7 @@ if st.button('Submit', key='submit_button'):
 
 # Clear chat history button
 def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
+    st.session_state.messages = []
+    st.session_state.chat_placeholder = []
 
 st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
