@@ -199,7 +199,10 @@ if st.session_state.conversation_history:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
+def clear_conversation():
+    # Clear the conversation history
+    st.session_state.conversation_history = []
+
 # Add a clear conversation button
-clear_conversation = st.button('Clear Conversation', key="clear_conversation")
-if clear_conversation:
-    st.session_state.conversation_history.clear()
+if st.button('Clear Conversation'):
+    clear_conversation()
