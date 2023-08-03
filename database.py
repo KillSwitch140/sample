@@ -37,10 +37,10 @@ def insert_resume(connection, candidate_info):
     """
     cursor = connection.cursor()
     cursor.execute(insert_query, (
-        candidate_info.get("name"),
-        candidate_info.get("gpa"),
-        candidate_info.get("email"),
-        candidate_info.get("resume_text")
+        candidate_info["name"],
+        candidate_info["gpa"],
+        candidate_info["email"],
+        candidate_info["resume_text"]
     ))
     connection.commit()
     cursor.close()
@@ -53,12 +53,3 @@ def get_all_resumes(connection):
     resumes = cursor.fetchall()
     cursor.close()
     return resumes
-
-def get_candidate_email(connection, candidate_name):
-    query = f"SELECT email FROM resumes WHERE name = ?"
-    cursor = connection.cursor()
-    cursor.execute(query, (candidate_name,))
-    email_result = cursor.fetchone()
-    cursor.close()
-
-    return email_result[0] if email_result else None
