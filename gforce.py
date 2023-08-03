@@ -1,4 +1,5 @@
 import streamlit as st
+import PyPDF2
 from langchain.llms import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
@@ -6,6 +7,15 @@ from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 
 api_key = st.secrets["OPENAI_API_KEY"]
+
+def read_pdf_text(uploaded_file):
+    pdf_reader = PyPDF2.PdfReader(uploaded_file)
+    text = ""
+
+    for page in pdf_reader.pages:
+        text += page.extract_text()
+
+    return text
 
 def generate_response(doc_texts, openai_api_key, query_text):
     # Split documents into chunks
