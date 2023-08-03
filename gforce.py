@@ -54,6 +54,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     retriever=vectordb.as_retriever(),
     return_source_documents=True,
     chain_type_kwargs={"prompt": QA_CHAIN_PROMPT}
+    )
 
     # Generate response
     response = qa_chain.run(query_text)
