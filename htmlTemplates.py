@@ -1,57 +1,44 @@
 css = '''
 <style>
-    .chat-container {
-        height: 25px;
-        overflow-y: scroll;
-    }
-    .user-bubble {
-        display: flex;
-        justify-content: flex-start;
-    }
-    .user-bubble > div {
-        padding: 15px;
-        background-color: #e0e0e0;
-        border-radius: 10px;
-        width: 50%;
-        margin-left: 50%;
-    }
-    .assistant-bubble {
-        display: flex;
-        justify-content: flex-end;
-    }
-    .assistant-bubble > div {
-        padding: 15px;
-        background-color: #0078d4;
-        color: white;
-        border-radius: 10px;
-        width: 50%;
-        margin-right: 50%;
-    }
-    .chat-input-prompt {
-        position: sticky;
-        bottom: 0;
-        background-color: white;
-        padding: 10px;
-        width: 100%;
-    }
-    .chat-header {
-        position: sticky;
-        top: 0;
-        background-color: #f2f2f2;
-        padding: 10px;
-        width: 100%;
-    }
-</style>
+.chat-message {
+    padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; display: flex
+}
+.chat-message.user {
+    background-color: #2b313e
+}
+.chat-message.bot {
+    background-color: #475063
+}
+.chat-message .avatar {
+  width: 20%;
+}
+.chat-message .avatar img {
+  max-width: 78px;
+  max-height: 78px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.chat-message .message {
+  width: 80%;
+  padding: 0 1.5rem;
+  color: #fff;
+}
 '''
 
 bot_template = '''
-<div class="assistant-bubble">
-    <div>{{MSG}}</div>
+<div class="chat-message bot">
+    <div class="avatar">
+        <img src="https://i.ibb.co/cN0nmSj/Screenshot-2023-05-28-at-02-37-21.png" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
+    </div>
+    <div class="message">{{MSG}}</div>
 </div>
 '''
 
 user_template = '''
-<div class="user-bubble">
-    <div>{{MSG}}</div>
+<div class="chat-message user">
+    <div class="avatar">
+        <img src="https://i.ibb.co/rdZC7LZ/Photo-logo-1.png">
+    </div>    
+    <div class="message">{{MSG}}</div>
 </div>
 '''
