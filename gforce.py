@@ -56,9 +56,14 @@ uploaded_files = st.file_uploader('Upload PDF(s)', type=['pdf'], accept_multiple
 # Query text
 query_text = st.text_input('Enter your question:', placeholder='Please provide a short summary.')
 
+# Initialize chat placeholder as an empty list
+if "chat_placeholder" not in st.session_state.keys():
+    st.session_state.chat_placeholder = []
+
 # Chat history display
-for message in st.session_state.messages:
-    st.chat_message(message["role"]).write(message["content"])
+for message in st.session_state.chat_placeholder:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
 
 # Form input and query
 if st.button('Submit', key='submit_button'):
@@ -67,15 +72,13 @@ if st.button('Submit', key='submit_button'):
             documents = [read_pdf_text(file) for file in uploaded_files]
             with st.spinner('Calculating...'):
                 response = generate_response(documents, openai_api_key, query_text)
-                st.session_state.messages.append({"role": "user", "content": query_text})
-                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.session_state.chat_placeholder.append({"role": "user", "content": query_text})
+                st.session_state.chat_placeholder.append({"role": "assistant", "content": response})
 
             # Update chat display
-            chat_placeholder.empty()  # Clear previous chat messages
-            for message in st.session_state.messages:
-                with chat_placeholder.beta_container():
-                    with st.chat_message(message["role"]):
-                        st.write(message["content"])
+            for message in st.session_state.chat_placeholder:
+                with st.chat_message(message["role"]):
+                    st.write(message["content"])
         else:
             st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
 
