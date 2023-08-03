@@ -31,7 +31,7 @@ from langchain.document_loaders import PyPDFLoader
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
-def read_pdf(pdf_docs):
+def read_pdf(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
     text = ""
 
