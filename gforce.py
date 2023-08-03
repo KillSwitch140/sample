@@ -24,11 +24,14 @@ def read_pdf_text(uploaded_file):
 
 def generate_response(doc_texts, openai_api_key, query_text):
 
-    template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. Use three sentences maximum. Keep the answer as concise as possible. Always say "thanks for asking!" at the end of the answer. 
-    {context}
-    Question: {question}
-    Helpful Answer:"""
-    QA_CHAIN_PROMPT = PromptTemplate(input_variables=["context", "question"],template=template,)
+    system_message = "You are a hiring manager's helpful assistant that reads multiple resumes of candidates and answers any questions related to the candidates,\
+                        You are professional chatbot\
+                        Only answer the quesions truthfully and accurate do not provide further details.\
+                        If you don't know the answer, just say that you don't know, don't try to make up an answer.\
+                        If you are asked to summarize a candidate'sresume, summarize it in 5 sentences, 3 sentences for their experience and projects, 1 sentence for their education and 1 sentence for their skills\
+                        If you are asked to compare candidates just provide the summarization of their resumes\
+                        "
+    prompt = create_prompt(system_message=system_message)
 
     # Split documents into chunks
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -44,7 +47,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     retriever = db.as_retriever()
 
     # Create QA chain
-    qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key), chain_type='stuff', retriever=retriever)
+    qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key), chain_type='stuff', retriever=retriever, prompt=prompt)
 
     # Generate response
     response = qa.run(query_text)
