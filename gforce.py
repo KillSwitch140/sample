@@ -96,14 +96,25 @@ if uploaded_files:
 def generate_response(openai_api_key, query_text, candidates_info):
     # Load document if file is uploaded
     if len(candidates_info) > 0:
-        # Prepare the conversation history with the introduction message
-        conversation_history = [
-            {'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'},
-            {'role': 'user', 'content': query_text}
+        # Prepare the conversation history with user query
+        conversation_history = [{'role': 'user', 'content': query_text}]
+
+        # Extract candidate names mentioned in the query
+        mentioned_candidates = set()
+        for candidate_info in candidates_info:
+            candidate_name = candidate_info['name']
+            if candidate_name and candidate_name.lower() in query_text.lower():
+                mentioned_candidates.add(candidate_name)
+
+        # Filter candidates based on the mentioned names
+        filtered_candidates_info = [
+            candidate_info
+            for candidate_info in candidates_info
+            if candidate_info['name'] in mentioned_candidates
         ]
 
-        # Process each resume separately and store the summaries in candidates_info
-        for idx, candidate_info in enumerate(candidates_info):
+        # Process each resume separately and store the summaries in filtered_candidates_info
+        for idx, candidate_info in enumerate(filtered_candidates_info):
             resume_text = candidate_info["resume_text"]
             # Append the summarized resume text to the conversation history
             conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
@@ -120,6 +131,7 @@ def generate_response(openai_api_key, query_text, candidates_info):
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
+
 
 
 # User query
