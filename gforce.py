@@ -98,36 +98,30 @@ def generate_response(openai_api_key, query_text, candidates_info):
     if len(candidates_info) > 0:
         # Prepare the conversation history with user query
         conversation_history = [{'role': 'user', 'content': query_text}]
-        candidate_name = extract_candidate_name(query_text)  # Extract candidate name from the query
+
+        # Process each resume separately and store the summaries in candidates_info
+        for idx, candidate_info in enumerate(candidates_info):
+            resume_text = candidate_info["resume_text"]
+            # Append the summarized resume text to the conversation history
+            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
+
+        # Extract candidate name from the query
+        candidate_name = extract_candidate_name(query_text)
 
         if 'compare' in query_text.lower():
             # Prepare the conversation history with user query and relevant candidate names
-            candidate_names = [candidate['name'] for candidate in candidates_info]
-            conversation_history.extend([{'role': 'system', 'content': f'Candidate {idx + 1}: {name}'} for idx, name in enumerate(candidate_names)])
+            conversation_history.append({'role': 'system', 'content': f'Candidate 1: {candidates_info[0]["name"]}'})
+            conversation_history.append({'role': 'system', 'content': f'Candidate 2: {candidates_info[1]["name"]}'})
+        elif 'email' in query_text.lower() or 'gpa' in query_text.lower() or 'past experience' in query_text.lower():
+            # Prepare the conversation history with user query and candidate name
+            conversation_history.append({'role': 'system', 'content': f'Candidate: {candidate_name}'})
 
-        elif 'email' in query_text.lower():
-            # Prepare the conversation history to find candidate's email
-            conversation_history.append({'role': 'system', 'content': f'Find the email of candidate: {candidate_name}'})
+            # Fetch candidate information from the database based on the candidate's name
+            candidate_info = get_candidate_info_from_database(candidate_name)
 
-        elif 'gpa' in query_text.lower():
-            # Prepare the conversation history to find candidate's GPA
-            conversation_history.append({'role': 'system', 'content': f'Find the GPA of candidate: {candidate_name}'})
-        
-        elif 'past experience' in query_text.lower():
-            # Prepare the conversation history to discuss candidate's past experience
-            conversation_history.append({'role': 'system', 'content': f'Candidate: {candidate_name}, tell me about your past experience.'})
+            # Append the retrieved information to the conversation history
+            conversation_history.append({'role': 'system', 'content': f'Candidate Info: {candidate_info}'})
 
-        else:
-            # Handle other general queries or unknown tasks here
-            # You can use GPT-3.5-turbo to respond to these queries
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=conversation_history,
-                api_key=openai_api_key
-            )
-            assistant_response = response['choices'][0]['message']['content']
-            return assistant_response
-        
         # Generate the response using the updated conversation history
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -136,10 +130,17 @@ def generate_response(openai_api_key, query_text, candidates_info):
         )
         # Get the assistant's response
         assistant_response = response['choices'][0]['message']['content']
+
+        # Ensure the assistant's response explicitly states the candidate's name
+        if candidate_name and candidate_name not in assistant_response:
+            corrected_response = f"I apologize, I provided information about the wrong candidate. Let me clarify. {candidate_name}'s " + assistant_response
+            return corrected_response
+
         return assistant_response
 
     else:
         return "Sorry, no resumes found in the database. Please upload resumes first."
+
 
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
