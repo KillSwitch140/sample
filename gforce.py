@@ -1,5 +1,5 @@
 import streamlit as st
-import PyPDF2
+from PyPDF2 import PdfReader
 from langchain.llms import OpenAI
 from langchain.vectorstores import Chroma
 import pysqlite3
@@ -19,18 +19,14 @@ from htmlTemplates import css, bot_template, user_template
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
-def read_pdf(uploaded_files):
+def get_pdf_text(pdf_docs):
     text = ""
-
-    for uploaded_file in uploaded_files:
-        pdf_reader = PyPDF2.PdfReader(uploaded_file)
+    for pdf in pdf_docs:
+        pdf_reader = PdfReader(pdf)
         for page in pdf_reader.pages:
-            page_text = page.extract_text()
-            text += page_text
-            # Debug output to check page text
-            st.write(f"Page Text for {uploaded_file.name}: {page_text}")
-
+            text += page.extract_text()
     return text
+
 
 def get_text_chunks(documents):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
@@ -68,48 +64,4 @@ def handle_userinput(user_question):
         
 
 
-def main():
-    # Page title
-    st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
-    st.title('Gforce Resume Assistant')
-
-    if "conversation" not in st.session_state:
-        st.session_state.conversation = None
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = None
-
-    st.header("Chat with multiple PDFs :books:")
-    user_question = st.text_input("Ask a question about your documents:")
-    if user_question:
-        handle_userinput(user_question)
-
-    with st.sidebar:
-        st.subheader("Your documents")
-        pdf_docs = st.file_uploader('Upload PDF(s)', type=['pdf'], accept_multiple_files=True)
-        if st.button("Process"):
-            with st.spinner("Processing"):
-                # Debug output to check uploaded PDFs
-                if pdf_docs:
-                    st.write(f"Number of uploaded PDFs: {len(pdf_docs)}")
-                    for pdf_doc in pdf_docs:
-                        st.write(f"Uploaded PDF: {pdf_doc.name}")
-                else:
-                    st.warning("No PDFs uploaded.")
-                    return
-
-                # get pdf text
-                raw_text = read_pdf(pdf_docs)
-
-                # get the text chunks
-                text_chunks = get_text_chunks(raw_text)
-
-                # create vector store
-                vectorstore = get_vectorstore(text_chunks)
-
-                # create conversation chain
-                st.session_state.conversation = get_conversation_chain(vectorstore)
-
-
-
-if __name__ == '__main__':
-    main()
+from PyPDF2 import PdfReader
