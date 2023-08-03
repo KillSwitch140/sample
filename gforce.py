@@ -58,7 +58,7 @@ query_text = st.text_input('Enter your question:', placeholder='Please provide a
 
 # Chat history display
 for message in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
+    st.chat_message(message["role"]).write(message["content"])
 
 # Form input and query
 if st.button('Submit', key='submit_button'):
