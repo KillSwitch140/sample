@@ -40,16 +40,13 @@ def read_pdf(pdf_docs):
     return text
 
 def get_text_chunks(file):
-    # load documents
-    loader = PyPDFLoader(file)
-    documents = loader.load()
-    text_splitter = RecursiveCharacterTextSplitter(
+    text_splitter = CharacterTextSplitter(
         separator="\n",
         chunk_size=1000,
         chunk_overlap=200,
         length_function=len
     )
-    chunks = text_splitter.split_text(text)
+    chunks = text_splitter.split_text(file)
     return chunks
 
 def get_vectorstore(text_chunks):
