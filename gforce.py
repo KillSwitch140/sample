@@ -6,7 +6,7 @@ import pysqlite3
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from langchain.chat_models import ChatOpenAI
-from langchain.embeddings.openai import OpenAIEmbeddings,HuggingFaceInstructEmbeddings
+from langchain.embeddings import OpenAIEmbeddings, HuggingFaceInstructEmbeddings
 from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
 from langchain.vectorstores import DocArrayInMemorySearch
 from langchain.document_loaders import TextLoader
