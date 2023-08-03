@@ -96,15 +96,17 @@ if uploaded_files:
 def generate_response(openai_api_key, query_text, candidates_info):
     # Load document if file is uploaded
     if len(candidates_info) > 0:
-        # Prepare the conversation history with user query
-        conversation_history = [{'role': 'user', 'content': query_text}]
+        # Prepare the conversation history with the introduction message
+        conversation_history = [
+            {'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'},
+            {'role': 'user', 'content': query_text}
+        ]
 
         # Process each resume separately and store the summaries in candidates_info
         for idx, candidate_info in enumerate(candidates_info):
             resume_text = candidate_info["resume_text"]
             # Append the summarized resume text to the conversation history
             conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
-
 
         # Generate the response using the updated conversation history
         response = openai.ChatCompletion.create(
