@@ -31,6 +31,14 @@ from langchain.document_loaders import PyPDFLoader
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
+def read_pdf(pdf_docs):
+    text = ""
+    for pdf in pdf_docs:
+        pdf_reader = PdfReader(pdf)
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+    return text
+
 def get_text_chunks(file):
     # load documents
     loader = PyPDFLoader(file)
@@ -41,7 +49,7 @@ def get_text_chunks(file):
         chunk_overlap=200,
         length_function=len
     )
-    chunks = text_splitter.split_documents(text)
+    chunks = text_splitter.split_text(text)
     return chunks
 
 def get_vectorstore(text_chunks):
@@ -104,9 +112,11 @@ def main():
             "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
         if st.button("Process"):
             with st.spinner("Processing"):
-                
+               # get pdf text
+                raw_text = get_pdf_text(pdf_docs)
+
                 # get the text chunks
-                text_chunks = get_text_chunks(pdf_docs)
+                text_chunks = get_text_chunks(raw_text)
 
                 # create vector store
                 vectorstore = get_vectorstore(text_chunks)
