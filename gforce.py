@@ -60,11 +60,6 @@ query_text = st.text_input('Enter your question:', placeholder='Please provide a
 if "chat_placeholder" not in st.session_state.keys():
     st.session_state.chat_placeholder = []
 
-# Chat history display
-for message in st.session_state.chat_placeholder:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
-
 # Form input and query
 if st.button('Submit', key='submit_button'):
     if openai_api_key.startswith('sk-'):
