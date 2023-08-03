@@ -134,7 +134,7 @@ def main():
 
         st.markdown('<div class="chat-container">', unsafe_allow_html=True)
         for message in st.session_state.chat_history:
-        display_chat_message(message.content, isinstance(message, HumanMessage))
+            display_chat_message(message.content, isinstance(message, HumanMessage))
         st.markdown('</div>', unsafe_allow_html=True)
 
 
