@@ -19,15 +19,32 @@ def read_pdf_text(uploaded_file):
 if "conversation_history" not in st.session_state:
     st.session_state.conversation_history = [{'role': 'system', 'content': 'Hello! I am your recruiter assistant. My role is to go through resumes and help recruiters make informed decisions.'}]
 
-# Function to prompt GPT-3.5-turbo with user query
-def generate_response(openai_api_key, user_query, conversation_history):
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=conversation_history + [{'role': 'user', 'content': user_query}],
-        api_key=openai_api_key
-    )
+def generate_response(openai_api_key, query_text, uploaded_files):
+    # Load document if file is uploaded
+    if uploaded_files:
+        # Prepare the conversation history with user query
+        conversation_history = [{'role': 'user', 'content': query_text}]
 
-    return response['choices'][0]['message']['content']
+        # Process each uploaded resume separately
+        for idx, uploaded_file in enumerate(uploaded_files):
+            resume_text = read_pdf_text(uploaded_file)
+
+            # Append the resume text to the conversation history
+            conversation_history.append({'role': 'system', 'content': f'Resume {idx + 1}: {resume_text}'})
+
+        # Generate the response using the updated conversation history
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=conversation_history,
+            api_key=openai_api_key
+        )
+        # Get the assistant's response
+        assistant_response = response['choices'][0]['message']['content']
+        return assistant_response
+
+    else:
+        return "Sorry, no resumes uploaded. Please upload resumes first."
+
 
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
