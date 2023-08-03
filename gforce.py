@@ -47,7 +47,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     retriever = db.as_retriever()
 
     # Create QA chain
-    qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key), chain_type='stuff', retriever=retriever, prompt=prompt)
+    qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key),  chain_type_kwargs={"prompt": Recruiter_bot}, retriever=retriever, )
 
     # Generate response
     response = qa.run(query_text)
