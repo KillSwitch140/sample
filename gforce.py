@@ -49,7 +49,8 @@ def get_text_chunks(file):
         chunk_overlap=200,
         length_function=len
     )
-    chunks = text_splitter.split_text(file)
+    chunks = text_splitter.create_documents(file)
+
     return chunks
 
 def get_vectorstore(text_chunks):
