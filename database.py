@@ -53,3 +53,25 @@ def get_all_resumes(connection):
     resumes = cursor.fetchall()
     cursor.close()
     return resumes
+
+import sqlite3
+
+# Function to retrieve candidate information from the database based on the candidate's name
+def get_candidate_info_from_database(connection, candidate_name):
+    select_query = "SELECT name, gpa, email, resume_text FROM resumes WHERE name = ?;"
+    cursor = connection.cursor()
+    cursor.execute(select_query, (candidate_name,))
+    candidate_info = cursor.fetchone()
+    cursor.close()
+
+    if candidate_info:
+        # Convert the fetched data to a dictionary
+        candidate_info_dict = {
+            'name': candidate_info[0],
+            'gpa': candidate_info[1],
+            'email': candidate_info[2],
+            'resume_text': candidate_info[3]
+        }
+        return candidate_info_dict
+    else:
+        return None
