@@ -60,6 +60,25 @@ query_text = st.text_input('Enter your question:', placeholder='Please provide a
 if "chat_placeholder" not in st.session_state.keys():
     st.session_state.chat_placeholder = []
 
+# Function to display chat messages
+def display_chat():
+    for message in st.session_state.chat_placeholder:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+
+# Clear chat history button
+def clear_chat_history():
+    st.session_state.messages = []
+    st.session_state.chat_placeholder = []
+    uploaded_files.clear()
+    query_text = ""
+    st.empty()  # Clear the chat display
+
+st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
+
+# Display the chat history
+display_chat()
+
 # Form input and query
 if st.button('Submit', key='submit_button'):
     if openai_api_key.startswith('sk-'):
@@ -70,16 +89,8 @@ if st.button('Submit', key='submit_button'):
                 st.session_state.chat_placeholder.append({"role": "user", "content": query_text})
                 st.session_state.chat_placeholder.append({"role": "assistant", "content": response})
 
-            # Update chat display
-            for message in st.session_state.chat_placeholder:
-                with st.chat_message(message["role"]):
-                    st.write(message["content"])
+            # Clear and update chat display
+            st.empty()  # Clear previous chat messages
+            display_chat()
         else:
             st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
-
-# Clear chat history button
-def clear_chat_history():
-    st.session_state.messages = []
-    st.session_state.chat_placeholder = []
-
-st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
