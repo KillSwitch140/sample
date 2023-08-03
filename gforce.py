@@ -34,7 +34,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
                         "
     prompt = ChatPromptTemplate.from_template(system_message)
     Recruiter_bot = prompt.format_messages(style = style)
-    llm = ChatOpenAI(model_name=llm_name, temperature=0.1)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1)
     # Split documents into chunks
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.create_documents(doc_texts)
