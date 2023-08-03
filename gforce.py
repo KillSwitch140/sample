@@ -65,80 +65,39 @@ def display_chat_message(message, is_user):
         """.format(message), unsafe_allow_html=True)
 
 
+def handle_userinput(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chat_history = response['chat_history']
+
+    for i, message in enumerate(st.session_state.chat_history):
+        if i % 2 == 0:
+            st.write(user_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+        else:
+            st.write(bot_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+            
+
+# Store LLM generated responses
+if "messages" not in st.session_state.keys():
+    st.session_state.messages = [{"role": "assistant", "content": "Hi, I am your resume Q&A bot. How can I help you today?"}]
+
+
+
 def main():
     # Page title
     st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
     st.title('Gforce Resume Assistant')
 
-    # CSS Styles
-    st.markdown("""
-    <style>
-        .chat-container {
-            height: 400px;
-            overflow-y: scroll;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-top: 10px;
-        }
-        .user-bubble {
-            display: flex;
-            justify-content: flex-start;
-        }
-        .user-bubble > div {
-            padding: 15px;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            width: 50%;
-            margin-left: 50%;
-        }
-        .assistant-bubble {
-            display: flex;
-            justify-content: flex-end;
-        }
-        .assistant-bubble > div {
-            padding: 15px;
-            background-color: #0078d4;
-            color: white;
-            border-radius: 10px;
-            width: 50%;
-            margin-right: 50%;
-        }
-        .chat-input-prompt {
-            position: sticky;
-            bottom: 0;
-            background-color: white;
-            padding: 10px;
-            width: 100%;
-        }
-        .chat-header {
-            position: sticky;
-            top: 0;
-            background-color: #f2f2f2;
-            padding: 10px;
-            width: 100%;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    if "conversation" not in st.session_state.keys():
+    if "conversation" not in st.session_state:
         st.session_state.conversation = None
-    if "chat_history" not in st.session_state.keys():
+    if "chat_history" not in st.session_state:
         st.session_state.chat_history = None
 
     st.header("Chat with multiple PDFs :books:")
     user_question = st.text_input("Ask a question about your documents:")
-
     if user_question:
-        response = st.session_state.conversation({'question': user_question})
-        st.session_state.chat_history = response['chat_history']
-
-        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-        for message in st.session_state.chat_history:
-            display_chat_message(message.content, isinstance(message, HumanMessage))
-        st.markdown('</div>', unsafe_allow_html=True)
-
-
-
+        handle_userinput(user_question)
 
     with st.sidebar:
         st.subheader("Your documents")
@@ -146,7 +105,7 @@ def main():
             "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
         if st.button("Process"):
             with st.spinner("Processing"):
-                # get pdf text
+               # get pdf text
                 raw_text = read_pdf(pdf_docs)
 
                 # get the text chunks
