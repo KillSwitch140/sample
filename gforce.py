@@ -43,13 +43,9 @@ def read_pdf(uploaded_files):
 
 
 def get_text_chunks(file):
-    text_splitter = CharacterTextSplitter(
-        separator="\n",
-        chunk_size=1000,
-        chunk_overlap=200,
-        length_function=len
-    )
-    chunks = text_splitter.create_documents(file)
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    texts = text_splitter.create_documents(file)
+
 
     return chunks
 
