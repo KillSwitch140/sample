@@ -62,10 +62,8 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 # Form input and query
-result = []
-with st.form('myform', clear_on_submit=True):
-    submitted = st.form_submit_button('Submit')
-    if submitted and openai_api_key.startswith('sk-'):
+if st.button('Submit', key='submit_button'):
+    if openai_api_key.startswith('sk-'):
         if uploaded_files and query_text:
             documents = [read_pdf_text(file) for file in uploaded_files]
             with st.spinner('Calculating...'):
