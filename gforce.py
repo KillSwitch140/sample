@@ -1,15 +1,33 @@
 import streamlit as st
 import PyPDF2
 from langchain.llms import OpenAI
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
-from langchain.chains import RetrievalQA
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import (
+    ChatPromptTemplate,
+    PromptTemplate,
+    SystemMessagePromptTemplate,
+    AIMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
+from langchain.schema import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage
+)
 import pysqlite3
-from langchain.chat_models import ChatOpenAI
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+from langchain.chat_models import ChatOpenAI
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
+from langchain.vectorstores import DocArrayInMemorySearch
+from langchain.document_loaders import TextLoader
+from langchain.chains import RetrievalQA,  ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+from langchain.chat_models import ChatOpenAI
+from langchain.document_loaders import TextLoader
+from langchain.document_loaders import PyPDFLoader
+
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
@@ -21,45 +39,54 @@ def read_pdf_text(uploaded_file):
         text += page.extract_text()
 
     return text
- 
 
-def generate_response(doc_texts, openai_api_key, query_text):
-    style= """ Professional, polite and respectful tone"""
-    system_message = """You are a hiring manager's helpful assistant that reads multiple resumes of candidates and answers any questions related to the candidates,\
-                        You are chatbot that talks in a {style} \
-                        Only answer the quesions truthfully and accurate do not provide further details.\
-                        If you don't know the answer, just say that you don't know, don't try to make up an answer.\
-                        If you are asked to summarize a candidate'sresume, summarize it in 5 sentences, 3 sentences for their experience and projects, 1 sentence for their education and 1 sentence for their skills\
-                        If you are asked to compare candidates just provide the summarization of their resumes\
-                        """
-    prompt = ChatPromptTemplate.from_template(system_message)
-    Recruiter_bot = prompt.format_messages(style = style)
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1)
-    # Split documents into chunks
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-    texts = text_splitter.create_documents(doc_texts)
-
-    # Select embeddings
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-
-    # Create a vectorstore from documents
-    db = Chroma.from_documents(texts, embeddings)
-
-    # Create retriever interface
-    retriever = db.as_retriever()
-
-    # Create QA chain
-    qa_chain = RetrievalQA.from_chain_type(
-    llm,
-    retriever=retriever,
-    return_source_documents=True,
-    chain_type_kwargs={"prompt": Recruiter_bot }
+def get_text_chunks(file):
+    # load documents
+    loader = PyPDFLoader(file)
+    documents = loader.load()
+    text_splitter = RecursiveCharacterTextSplitter(
+        separator="\n",
+        chunk_size=1000,
+        chunk_overlap=200,
+        length_function=len
     )
+    chunks = text_splitter.split_documents(text)
+    return chunks
 
-    # Generate response
-    response = qa_chain.run(query_text)
+def get_vectorstore(text_chunks):
+   embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    vectorstore = DocArrayInMemorySearch.from_documents(texts=text_chunks, embedding=embeddings)
+    return vectorstore
+    
+def get_conversation_chain(vectorstore):
+     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1    )
+    # llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
 
-    return response
+    memory = ConversationBufferMemory(
+        memory_key='chat_history', return_messages=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory
+    )
+    return conversation_chain    
+
+def handle_userinput(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chat_history = response['chat_history']
+
+    for i, message in enumerate(st.session_state.chat_history):
+        if i % 2 == 0:
+            st.write(user_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+        else:
+            st.write(bot_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+            
+
+
+
 
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
@@ -69,35 +96,31 @@ if "messages" not in st.session_state.keys():
 st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
 st.title('Gforce Resume Assistant')
 
-# File upload
-uploaded_files = st.file_uploader('Upload PDF(s)', type=['pdf'], accept_multiple_files=True)
+if "conversation" not in st.session_state:
+        st.session_state.conversation = None
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = None
 
-# Query text
-query_text = st.text_input('Enter your question:', placeholder='Please provide a short summary.')
+    st.header("Chat with multiple PDFs :books:")
+    user_question = st.text_input("Ask a question about your documents:")
+    if user_question:
+        handle_userinput(user_question)
 
-# Initialize chat placeholder as an empty list
-if "chat_placeholder" not in st.session_state.keys():
-    st.session_state.chat_placeholder = []
+    with st.sidebar:
+        st.subheader("Your documents")
+        pdf_docs = st.file_uploader(
+            "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
+        if st.button("Process"):
+            with st.spinner("Processing"):
+                # get pdf text
+                raw_text = get_pdf_text(pdf_docs)
 
-# Form input and query
-if st.button('Submit', key='submit_button'):
-    if openai_api_key.startswith('sk-'):
-        if uploaded_files and query_text:
-            documents = [read_pdf_text(file) for file in uploaded_files]
-            with st.spinner('Chatbot is typing...'):
-                response = generate_response(documents, openai_api_key, query_text)
-                st.session_state.chat_placeholder.append({"role": "user", "content": query_text})
-                st.session_state.chat_placeholder.append({"role": "assistant", "content": response})
+                # get the text chunks
+                text_chunks = get_text_chunks(raw_text)
 
-            # Update chat display
-            for message in st.session_state.chat_placeholder:
-                with st.chat_message(message["role"]):
-                    st.write(message["content"])
-        else:
-            st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
+                # create vector store
+                vectorstore = get_vectorstore(text_chunks)
 
-# Clear chat history button
-def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
-
-st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
+                # create conversation chain
+                st.session_state.conversation = get_conversation_chain(
+                    vectorstore)
