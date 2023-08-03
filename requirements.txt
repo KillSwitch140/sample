@@ -16,3 +16,4 @@ scipy
 tensorflow
 tensorflow-hub
 pypdf
+InstructorEmbedding
