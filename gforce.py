@@ -47,8 +47,8 @@ if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": "Hi, I am your resume Q&A bot. How can I help you today?"}]
 
 # Page title
-st.set_page_config(page_title='Gforce Resume Assistant')
-st.title('🦜🔗 Ask the Doc App')
+st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
+st.title('Gforce Resume Assistant')
 
 # File upload
 uploaded_files = st.file_uploader('Upload PDF(s)', type=['pdf'], accept_multiple_files=True)
