@@ -44,9 +44,7 @@ def read_pdf(uploaded_files):
 
 def get_text_chunks(file):
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-    texts = text_splitter.create_documents(file)
-
-
+    chunks = text_splitter.create_documents(file)
     return chunks
 
 def get_vectorstore(text_chunks):
