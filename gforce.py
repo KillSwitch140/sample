@@ -25,7 +25,10 @@ def read_pdf(uploaded_files):
     for uploaded_file in uploaded_files:
         pdf_reader = PyPDF2.PdfReader(uploaded_file)
         for page in pdf_reader.pages:
-            text += page.extract_text()
+            page_text = page.extract_text()
+            text += page_text
+            # Debug output to check page text
+            st.write(f"Page Text for {uploaded_file.name}: {page_text}")
 
     return text
 
@@ -85,7 +88,16 @@ def main():
             "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
         if st.button("Process"):
             with st.spinner("Processing"):
-               # get pdf text
+                # Debug output to check uploaded PDFs
+                if pdf_docs:
+                    st.write(f"Number of uploaded PDFs: {len(pdf_docs)}")
+                    for pdf_doc in pdf_docs:
+                        st.write(f"Uploaded PDF: {pdf_doc.name}")
+                else:
+                    st.warning("No PDFs uploaded.")
+                    return
+
+                # get pdf text
                 raw_text = read_pdf(pdf_docs)
 
                 # get the text chunks
@@ -96,6 +108,7 @@ def main():
 
                 # create conversation chain
                 st.session_state.conversation = get_conversation_chain(vectorstore)
+
 
 
 if __name__ == '__main__':
