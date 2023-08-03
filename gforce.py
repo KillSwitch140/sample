@@ -31,15 +31,6 @@ from langchain.document_loaders import PyPDFLoader
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
-def read_pdf_text(uploaded_file):
-    pdf_reader = PyPDF2.PdfReader(uploaded_file)
-    text = ""
-
-    for page in pdf_reader.pages:
-        text += page.extract_text()
-
-    return text
-
 def get_text_chunks(file):
     # load documents
     loader = PyPDFLoader(file)
@@ -55,9 +46,10 @@ def get_text_chunks(file):
 
 def get_vectorstore(text_chunks):
    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-    vectorstore = DocArrayInMemorySearch.from_documents(texts=text_chunks, embedding=embeddings)
-    return vectorstore
+   # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+   vectorstore = DocArrayInMemorySearch.from_documents(texts=text_chunks, embedding=embeddings)
+   return vectorstore 
+    
     
 def get_conversation_chain(vectorstore):
      llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1    )
@@ -84,9 +76,6 @@ def handle_userinput(user_question):
             st.write(bot_template.replace(
                 "{{MSG}}", message.content), unsafe_allow_html=True)
             
-
-
-
 
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
