@@ -49,19 +49,21 @@ def get_conversation_chain(vectorstore):
     )
     return conversation_chain
 
-def display_chat_message(message, role):
-    if role == "user":
+# Function to display the chat messages
+def display_chat_message(message, is_user):
+    if is_user:
         st.markdown("""
         <div class="user-bubble">
             <div>{}</div>
         </div>
         """.format(message), unsafe_allow_html=True)
-    elif role == "assistant":
+    else:
         st.markdown("""
         <div class="assistant-bubble">
             <div>{}</div>
         </div>
         """.format(message), unsafe_allow_html=True)
+
 
 def main():
     # Page title
@@ -127,13 +129,14 @@ def main():
     user_question = st.text_input("Ask a question about your documents:")
 
     if user_question:
-        response = st.session_state.conversation({'question': user_question})
-        st.session_state.chat_history = response['chat_history']
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chat_history = response['chat_history']
 
-        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-        for message in st.session_state.chat_history:
-            display_chat_message(message.content, message.role)
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    for message in st.session_state.chat_history:
+        display_chat_message(message.content, isinstance(message, HumanMessage))
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
     with st.sidebar:
         st.subheader("Your documents")
