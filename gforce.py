@@ -51,6 +51,19 @@ def extract_candidate_name(resume_text):
             break
     return candidate_name
 
+# Function to extract candidate names mentioned in the user query using spaCy NER
+def extract_mentioned_candidates(query_text, candidates_info):
+    nlp = spacy.load("en_core_web_sm")
+    doc = nlp(query_text)
+    mentioned_candidates = set()
+    for ent in doc.ents:
+        if ent.label_ == "PERSON":
+            for candidate_info in candidates_info:
+                candidate_name = candidate_info['name']
+                if candidate_name and ent.text.lower() in candidate_name.lower():
+                    mentioned_candidates.add(candidate_name)
+    return mentioned_candidates
+
 # Page title and styling
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
@@ -100,11 +113,7 @@ def generate_response(openai_api_key, query_text, candidates_info):
         conversation_history = [{'role': 'user', 'content': query_text}]
 
         # Extract candidate names mentioned in the query
-        mentioned_candidates = set()
-        for candidate_info in candidates_info:
-            candidate_name = candidate_info['name']
-            if candidate_name and candidate_name.lower() in query_text.lower():
-                mentioned_candidates.add(candidate_name)
+        mentioned_candidates = extract_mentioned_candidates(query_text, candidates_info)
 
         # Filter candidates based on the mentioned names
         filtered_candidates_info = [
