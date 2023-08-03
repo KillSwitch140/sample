@@ -7,6 +7,7 @@ from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.prompts import ChatPromptTemplate
 import pysqlite3
+from langchain.chat_models import ChatOpenAI
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
@@ -33,6 +34,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
                         "
     prompt = ChatPromptTemplate.from_template(system_message)
     Recruiter_bot = prompt.format_messages(style = style)
+    llm = ChatOpenAI(model_name=llm_name, temperature=0.1)
     # Split documents into chunks
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.create_documents(doc_texts)
@@ -47,10 +49,14 @@ def generate_response(doc_texts, openai_api_key, query_text):
     retriever = db.as_retriever()
 
     # Create QA chain
-    qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key),  chain_type_kwargs={"prompt": Recruiter_bot}, retriever=retriever, )
+    qa_chain = RetrievalQA.from_chain_type(
+    llm,
+    retriever=vectordb.as_retriever(),
+    return_source_documents=True,
+    chain_type_kwargs={"prompt": QA_CHAIN_PROMPT}
 
     # Generate response
-    response = qa.run(query_text)
+    response = qa_chain.run(query_text)
 
     return response
 
