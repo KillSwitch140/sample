@@ -55,6 +55,15 @@ def extract_candidate_name(resume_text):
 st.set_page_config(page_title='GForce Resume Reader', layout='wide')
 st.title('GForce Resume Reader')
 
+# Ask the user for job details as soon as they upload resumes
+job_title = st.sidebar.text_input("Enter the job title:")
+qualifications = st.sidebar.text_area("Enter the qualifications for the job (separated by commas):")
+
+# Display job details in the sidebar
+st.sidebar.header('Job Details')
+st.sidebar.write(f'Job Title: {job_title}')
+st.sidebar.write(f'Qualifications: {qualifications}')
+
 # List to store uploaded resume contents and extracted information
 uploaded_resumes = []
 candidates_info = []
