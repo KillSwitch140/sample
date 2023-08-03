@@ -49,6 +49,7 @@ uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accep
 # User query
 user_query = st.text_area('You (Type your message here):', value='', help='Ask away!', height=100, key="user_input")
 
+
 # Form input and query
 send_user_query = st.button('Send', help='Click to submit the query', key="send_user_query")
 if send_user_query:
