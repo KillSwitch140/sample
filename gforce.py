@@ -28,23 +28,32 @@ def get_pdf_text(pdf_docs):
     return text
 
 
-def get_text_chunks(documents):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    texts = text_splitter.create_documents(documents)
-    return texts
+def get_text_chunks(text):
+    text_splitter = CharacterTextSplitter(
+        separator="\n",
+        chunk_size=1000,
+        chunk_overlap=200,
+        length_function=len
+    )
+    chunks = text_splitter.split_text(text)
+    return chunks
 
-def get_vectorstore(texts):
-    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-    db = Chroma.from_documents(texts, embeddings)
-    return db
 
-def get_conversation_chain(db):
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1)
-    memory = ConversationBufferMemory(memory_key="chat_history",return_messages=True)
-    retriever=db.as_retriever()
+def get_vectorstore(text_chunks):
+    embeddings = OpenAIEmbeddings(openai_api_key)
+    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
+    return vectorstore
+
+
+def get_conversation_chain(vectorstore):
+    llm = ChatOpenAI()
+
+    memory = ConversationBufferMemory(
+        memory_key='chat_history', return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm,
-        retriever=retriever,
+        llm=llm,
+        retriever=vectorstore.as_retriever(),
         memory=memory
     )
     return conversation_chain
