@@ -81,9 +81,7 @@ def handle_userinput(user_question):
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": "Hi, I am your resume Q&A bot. How can I help you today?"}]
 
-# Page title
-st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
-st.title('Gforce Resume Assistant')
+
 
 def main():
     # Page title
