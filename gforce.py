@@ -44,24 +44,17 @@ def generate_response(doc_texts, openai_api_key, query_text):
 
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi, I am your resume Q&A bot. How can I help you today?"}]
 
 # Page title
-st.set_page_config(page_title='🦜🔗 Ask the Doc App')
+st.set_page_config(page_title='Gforce Resume Assistant')
 st.title('🦜🔗 Ask the Doc App')
 
 # File upload
-uploaded_files = st.file_uploader('Upload one or more PDF documents', type='pdf', accept_multiple_files=True)
+uploaded_files = st.file_uploader('Upload PDF(s)', type=['pdf'], accept_multiple_files=True)
 
 # Query text
-query_text = st.text_input('Enter your question:', placeholder='Please provide a short summary.', key="query_text")
-
-# Convert uploaded PDFs to text
-doc_texts = []
-for uploaded_file in uploaded_files:
-    if uploaded_file is not None:
-        text = read_pdf_text(uploaded_file)
-        doc_texts.append(text)
+query_text = st.text_input('Enter your question:', placeholder='Please provide a short summary.')
 
 # Chat history display
 for message in st.session_state.messages:
@@ -69,18 +62,19 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 # Form input and query
-if doc_texts and query_text:
-    result = []
-    with st.form('myform', clear_on_submit=True):
-        submitted = st.form_submit_button('Submit')
-        if submitted:
+result = []
+with st.form('myform', clear_on_submit=True):
+    submitted = st.form_submit_button('Submit')
+    if submitted and openai_api_key.startswith('sk-'):
+        if uploaded_files and query_text:
+            documents = [read_pdf_text(file) for file in uploaded_files]
             with st.spinner('Calculating...'):
-                response = generate_response(doc_texts, openai_api_key, query_text)
+                response = generate_response(documents, openai_api_key, query_text)
                 result.append(response)
                 st.session_state.messages.append({"role": "user", "content": query_text})
                 st.session_state.messages.append({"role": "assistant", "content": response})
-else:
-    st.warning("Please upload one or more PDF documents and enter a question to start the conversation.")
+        else:
+            st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
 
 # Clear chat history button
 def clear_chat_history():
