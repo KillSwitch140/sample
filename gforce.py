@@ -6,7 +6,7 @@ import pysqlite3
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from langchain.chat_models import ChatOpenAI
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.embeddings.openai import OpenAIEmbeddings,HuggingFaceInstructEmbeddings
 from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
 from langchain.vectorstores import DocArrayInMemorySearch
 from langchain.document_loaders import TextLoader
@@ -32,22 +32,23 @@ def read_pdf(uploaded_files):
 
     return text
 
-def get_text_chunks(file):
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-    chunks = text_splitter.create_documents(file)
-    return chunks
+def get_text_chunks(documents):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    texts = text_splitter.create_documents(documents)
+    return texts
 
-def get_vectorstore(text_chunks):
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    vectorstore = Chroma.from_documents(text_chunks, embeddings)
-    return vectorstore
+def get_vectorstore(texts):
+    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl)
+    db = Chroma.from_documents(texts, embeddings)
+    return db
 
-def get_conversation_chain(vectorstore):
+def get_conversation_chain(db):
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1)
-    memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+    memory = ConversationBufferMemory(memory_key="chat_history",return_messages=True)
+    retriever=db.as_retriever()
     conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=vectorstore.as_retriever(),
+        llm,
+        retriever=retriever,
         memory=memory
     )
     return conversation_chain
