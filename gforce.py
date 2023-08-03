@@ -106,7 +106,7 @@ def main():
             with st.spinner("Processing"):
                 
                 # get the text chunks
-                text_chunks = get_text_chunks(raw_text)
+                text_chunks = get_text_chunks(pdf_docs)
 
                 # create vector store
                 vectorstore = get_vectorstore(text_chunks)
