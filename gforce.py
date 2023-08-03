@@ -166,6 +166,15 @@ if send_user_query:
             response = generate_response(openai_api_key, user_query, candidates_info)
             # Append the assistant's response to the conversation history
             st.session_state.conversation_history.append({'role': 'assistant', 'content': response})
+
+# Add a clear conversation button
+clear_conversation = st.button('Clear Conversation', key="clear_conversation")
+if clear_conversation:
+    # Clear the conversation history and reset the session state
+    st.session_state.conversation_history.clear()
+    st.session_state.user_input = ""
+    st.session_state.send_user_query = False
+
 # Chat UI with sticky headers and input prompt
 st.markdown("""
 <style>
@@ -225,10 +234,4 @@ if st.session_state.conversation_history:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-def clear_conversation():
-    # Clear the conversation history
-    st.session_state.conversation_history = []
 
-# Add a clear conversation button
-if st.button('Clear Conversation'):
-    clear_conversation()
