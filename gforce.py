@@ -15,7 +15,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
 from langchain.document_loaders import PyPDFLoader
-
+from htmlTemplates import css, bot_template, user_template
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
