@@ -50,7 +50,7 @@ def get_text_chunks(file):
 def get_vectorstore(text_chunks):
    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-   vectorstore =  db = Chroma.from_documents(texts=text_chunks, embedding=embeddings)
+   vectorstore =  Chroma.from_documents(text_chunks, embeddings)
    return vectorstore 
     
     
