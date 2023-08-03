@@ -2,18 +2,6 @@ import streamlit as st
 import PyPDF2
 from langchain.llms import OpenAI
 from langchain.vectorstores import Chroma
-from langchain.prompts import (
-    ChatPromptTemplate,
-    PromptTemplate,
-    SystemMessagePromptTemplate,
-    AIMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
-from langchain.schema import (
-    AIMessage,
-    HumanMessage,
-    SystemMessage
-)
 import pysqlite3
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
@@ -30,68 +18,6 @@ from langchain.document_loaders import PyPDFLoader
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-
-# CSS styles for the chat messages
-chat_styles = """
-<style>
-    .chat-container {
-        height: 400px;
-        overflow-y: scroll;
-    }
-    .user-bubble {
-        display: flex;
-        justify-content: flex-start;
-    }
-    .user-bubble > div {
-        padding: 15px;
-        background-color: #e0e0e0;
-        border-radius: 10px;
-        width: 50%;
-        margin-left: 50%;
-    }
-    .assistant-bubble {
-        display: flex;
-        justify-content: flex-end;
-    }
-    .assistant-bubble > div {
-        padding: 15px;
-        background-color: #0078d4;
-        color: white;
-        border-radius: 10px;
-        width: 50%;
-        margin-right: 50%;
-    }
-    .chat-input-prompt {
-        position: sticky;
-        bottom: 0;
-        background-color: white;
-        padding: 10px;
-        width: 100%;
-    }
-    .chat-header {
-        position: sticky;
-        top: 0;
-        background-color: #f2f2f2;
-        padding: 10px;
-        width: 100%;
-    }
-</style>
-"""
-
-# Function to display the chat messages
-def display_chat_message(message, role):
-    if role == "user":
-        st.markdown("""
-        <div class="user-bubble">
-            <div>{}</div>
-        </div>
-        """.format(message), unsafe_allow_html=True)
-    elif role == "assistant":
-        st.markdown("""
-        <div class="assistant-bubble">
-            <div>{}</div>
-        </div>
-        """.format(message), unsafe_allow_html=True)
 
 def read_pdf(uploaded_files):
     text = ""
@@ -123,32 +49,91 @@ def get_conversation_chain(vectorstore):
     )
     return conversation_chain
 
-def handle_userinput(user_question):
-    response = st.session_state.conversation({'question': user_question})
-    st.session_state.chat_history = response['chat_history']
-
-    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-    for message in st.session_state.chat_history:
-        display_chat_message(message.content, message.role)
-    st.markdown('</div>', unsafe_allow_html=True)
+def display_chat_message(message, role):
+    if role == "user":
+        st.markdown("""
+        <div class="user-bubble">
+            <div>{}</div>
+        </div>
+        """.format(message), unsafe_allow_html=True)
+    elif role == "assistant":
+        st.markdown("""
+        <div class="assistant-bubble">
+            <div>{}</div>
+        </div>
+        """.format(message), unsafe_allow_html=True)
 
 def main():
+    # Page title
     st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
     st.title('Gforce Resume Assistant')
 
-    st.markdown(chat_styles, unsafe_allow_html=True)
+    # CSS Styles
+    st.markdown("""
+    <style>
+        .chat-container {
+            height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .user-bubble {
+            display: flex;
+            justify-content: flex-start;
+        }
+        .user-bubble > div {
+            padding: 15px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            width: 50%;
+            margin-left: 50%;
+        }
+        .assistant-bubble {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .assistant-bubble > div {
+            padding: 15px;
+            background-color: #0078d4;
+            color: white;
+            border-radius: 10px;
+            width: 50%;
+            margin-right: 50%;
+        }
+        .chat-input-prompt {
+            position: sticky;
+            bottom: 0;
+            background-color: white;
+            padding: 10px;
+            width: 100%;
+        }
+        .chat-header {
+            position: sticky;
+            top: 0;
+            background-color: #f2f2f2;
+            padding: 10px;
+            width: 100%;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-    openai_api_key = st.secrets["OPENAI_API_KEY"]
-
-    if "conversation" not in st.session_state:
+    if "conversation" not in st.session_state.keys():
         st.session_state.conversation = None
-    if "chat_history" not in st.session_state:
+    if "chat_history" not in st.session_state.keys():
         st.session_state.chat_history = None
 
     st.header("Chat with multiple PDFs :books:")
     user_question = st.text_input("Ask a question about your documents:")
+
     if user_question:
-        handle_userinput(user_question)
+        response = st.session_state.conversation({'question': user_question})
+        st.session_state.chat_history = response['chat_history']
+
+        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+        for message in st.session_state.chat_history:
+            display_chat_message(message.content, message.role)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with st.sidebar:
         st.subheader("Your documents")
@@ -166,7 +151,9 @@ def main():
                 vectorstore = get_vectorstore(text_chunks)
 
                 # create conversation chain
-                st.session_state.conversation = get_conversation_chain(vectorstore)
+                st.session_state.conversation = get_conversation_chain(
+                    vectorstore)
+
 
 if __name__ == '__main__':
     main()
