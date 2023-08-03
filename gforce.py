@@ -49,21 +49,6 @@ def get_conversation_chain(vectorstore):
     )
     return conversation_chain
 
-# Function to display the chat messages
-def display_chat_message(message, is_user):
-    if is_user:
-        st.markdown("""
-        <div class="user-bubble">
-            <div>{}</div>
-        </div>
-        """.format(message), unsafe_allow_html=True)
-    else:
-        st.markdown("""
-        <div class="assistant-bubble">
-            <div>{}</div>
-        </div>
-        """.format(message), unsafe_allow_html=True)
-
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})
@@ -110,8 +95,7 @@ def main():
                 vectorstore = get_vectorstore(text_chunks)
 
                 # create conversation chain
-                st.session_state.conversation = get_conversation_chain(
-                    vectorstore)
+                st.session_state.conversation = get_conversation_chain(vectorstore)
 
 
 if __name__ == '__main__':
