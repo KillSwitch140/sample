@@ -18,6 +18,27 @@ create_resumes_table(connection)
 # Load NER and NEL models
 nlp_ner = spacy.load("en_core_web_sm")
 
+# Page title and styling
+st.set_page_config(page_title='GForce Resume Reader', layout='wide')
+st.title('GForce Resume Reader')
+
+# Ask the user for job details as soon as they upload resumes
+job_title = st.sidebar.text_input("Enter the job title:")
+qualifications = st.sidebar.text_area("Enter the qualifications for the job (separated by commas):")
+
+# Display job details in the sidebar
+st.sidebar.header('Job Details')
+st.sidebar.write(f'Job Title: {job_title}')
+st.sidebar.write(f'Qualifications: {qualifications}')
+
+# List to store uploaded resume contents and extracted information
+uploaded_resumes = []
+candidates_info = []
+
+# File upload
+uploaded_files = st.file_uploader('Please upload your resume', type='pdf', accept_multiple_files=True)
+
+
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
     text = ""
