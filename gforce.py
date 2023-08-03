@@ -65,10 +65,17 @@ if st.button('Submit', key='submit_button'):
     if openai_api_key.startswith('sk-'):
         if uploaded_files and query_text:
             documents = [read_pdf_text(file) for file in uploaded_files]
-            with st.spinner('Chatbot is typing...'):
+            with st.spinner('Calculating...'):
                 response = generate_response(documents, openai_api_key, query_text)
                 st.session_state.messages.append({"role": "user", "content": query_text})
                 st.session_state.messages.append({"role": "assistant", "content": response})
+
+            # Update chat display
+            chat_placeholder.empty()  # Clear previous chat messages
+            for message in st.session_state.messages:
+                with chat_placeholder.beta_container():
+                    with st.chat_message(message["role"]):
+                        st.write(message["content"])
         else:
             st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
 
