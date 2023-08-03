@@ -5,6 +5,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
 import pysqlite3
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
@@ -19,8 +20,16 @@ def read_pdf_text(uploaded_file):
         text += page.extract_text()
 
     return text
+ 
 
 def generate_response(doc_texts, openai_api_key, query_text):
+
+    template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. Use three sentences maximum. Keep the answer as concise as possible. Always say "thanks for asking!" at the end of the answer. 
+    {context}
+    Question: {question}
+    Helpful Answer:"""
+    QA_CHAIN_PROMPT = PromptTemplate(input_variables=["context", "question"],template=template,)
+
     # Split documents into chunks
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.create_documents(doc_texts)
@@ -60,37 +69,25 @@ query_text = st.text_input('Enter your question:', placeholder='Please provide a
 if "chat_placeholder" not in st.session_state.keys():
     st.session_state.chat_placeholder = []
 
-# Function to display chat messages
-def display_chat():
-    for message in st.session_state.chat_placeholder:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])
-
-# Clear chat history button
-def clear_chat_history():
-    st.session_state.messages = []
-    st.session_state.chat_placeholder = []
-    uploaded_files.clear()
-    query_text = ""
-    st.empty()  # Clear the chat display
-
-st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
-
-# Display the chat history
-display_chat()
-
 # Form input and query
 if st.button('Submit', key='submit_button'):
     if openai_api_key.startswith('sk-'):
         if uploaded_files and query_text:
             documents = [read_pdf_text(file) for file in uploaded_files]
-            with st.spinner('Chatbot is ...'):
+            with st.spinner('Chatbot is typing...'):
                 response = generate_response(documents, openai_api_key, query_text)
                 st.session_state.chat_placeholder.append({"role": "user", "content": query_text})
                 st.session_state.chat_placeholder.append({"role": "assistant", "content": response})
 
-            # Clear and update chat display
-            st.empty()  # Clear previous chat messages
-            display_chat()
+            # Update chat display
+            for message in st.session_state.chat_placeholder:
+                with st.chat_message(message["role"]):
+                    st.write(message["content"])
         else:
             st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
+
+# Clear chat history button
+def clear_chat_history():
+    st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
+
+st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
