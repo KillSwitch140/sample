@@ -34,7 +34,7 @@ def get_text_chunks(documents):
     return texts
 
 def get_vectorstore(texts):
-    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl)
+    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
     db = Chroma.from_documents(texts, embeddings)
     return db
 
