@@ -96,20 +96,6 @@ if "messages" not in st.session_state.keys():
 st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
 st.title('Gforce Resume Assistant')
 
-# Fixed position for query input at the bottom
-st.markdown(
-    """
-    <style>
-    .css-17eq0hr {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Query input at the bottom of the page
 query_text = st.text_input('Enter your question:', key='query_input', placeholder='Please provide a short summary.')
 
