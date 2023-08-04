@@ -143,7 +143,7 @@ schedule_button = st.sidebar.button("Schedule Interview")
 meeting_scheduled = False
 
 # Check if the button is clicked and the inputs are not empty
-if schedule_button and person_name and person_email and date_time:
+if schedule_button and person_name and person_email and date and time:
     # Create the combined string
     meeting_title = f"Hiring Plug Interview with {person_email}"
     date_time = f"{date} at {time}"
