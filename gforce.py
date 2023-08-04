@@ -38,13 +38,10 @@ def read_pdf_text(uploaded_file):
 
     return text
 
-
- 
-
 def generate_response(doc_texts, openai_api_key, query_text):
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1,openai_api_key=openai_api_key)
-    llm.add_prompt(prompt)
+    
     # Split documents into chunks
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.create_documents(doc_texts)
