@@ -151,15 +151,16 @@ if schedule_button and person_name and person_email and date and time:
     send_email = (
         f"Draft a well formatted, professional email to {person_email} notifying {person_name} that they have been selected\ "
         f"for an interview with Hiring Plug. Please search my calendar for Hiring Plug Interview with {person_email} and provide the respective meeting details, and ask if the "
-        f"meeting timings are suitable for {person_name}."
-        f"Dear [Candidate's Name],
+        f"meeting timings are suitable for ."
+        f"Dear {person_name},
 
-Congratulations! You have been selected for an interview with Hiring Plug for the [Position Name] role.
+Congratulations! You have been selected for an interview with Hiring Plug for the role.
 
 Interview Details:
-Date: [Date]
-Time: [Time]
+Date: {date}
+Time: {time}
 Location: Virtual (Google Meet)
+Link:
 
 We are excited to discuss your skills and qualifications further. Your interview details have been added to our calendar. If the provided timing is not suitable, please let us know, and we will try our best to accommodate.
 
