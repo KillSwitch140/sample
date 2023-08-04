@@ -17,9 +17,14 @@ import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from qdrant_client import QdrantClient
 
-qdrant_client = QdrantClient(
+client = QdrantClient(
     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
     api_key=st.secrets["QDRANT_API_KEY"],
+)
+
+client.recreate_collection(
+    collection_name="test_collection",
+    vectors_config=VectorParams(size=4, distance=Distance.DOT),
 )
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
