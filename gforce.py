@@ -55,7 +55,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     # Create retriever interface
     retriever = db.as_retriever()
     #Bot memory
-    memory = ConversationBufferMemory(memory_key="chat_history",return_messages="True",input_key=)
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages="True", input_key="human_input")
 
     template = """You are an AI assistant helping interview candidates. Given the resumes and interview chat history, answer the interviewer's question.
 
