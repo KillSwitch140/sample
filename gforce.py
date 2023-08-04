@@ -70,9 +70,8 @@ def generate_response(doc_texts, openai_api_key, query_text):
     prompt = PromptTemplate(template=template, input_variables=["context", "chat_history", "human_input"])
     
     qa_chain = ConversationalRetrievalChain(
-                combine_docs_chain = TextConcatenationChain(),
-                  question_generator = FAQQuestionGenerator(),
                   llm = llm,
+                  retriever=retriever
                   prompt = prompt,
                   memory = memory
                 )
