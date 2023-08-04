@@ -16,18 +16,23 @@ from langchain.chat_models import ChatOpenAI
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from qdrant_client import QdrantClient
+from langchain.llms import OpenAI
+from langchain.agents import initialize_agent
+from langchain.agents.agent_toolkits import ZapierToolkit
+from langchain.utilities.zapier import ZapierNLAWrapper
 
-# client = QdrantClient(
-#     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
-#     api_key=st.secrets["QDRANT_API_KEY"],
-# )
 
-# client.recreate_collection(
-#     collection_name="resume_bot",
-#     vectors_config=VectorParams(size=4, distance=Distance.DOT),
-# )
-
+zapier_nla_api_key = st.secrets["ZAP_API_KEY"]
 openai_api_key = st.secrets["OPENAI_API_KEY"]
+client = QdrantClient(
+    url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
+    api_key=st.secrets["QDRANT_API_KEY"],
+)
+
+client.recreate_collection(
+    collection_name="resume_bot",
+    vectors_config=VectorParams(size=4, distance=Distance.DOT),
+)
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -111,3 +116,26 @@ def clear_chat_history():
     st.empty()  # Clear the chat display
 
 st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
+
+os.environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
+llm = OpenAI(temperature=0)
+zapier = ZapierNLAWrapper()
+toolkit = ZapierToolkit.from_zapier_nla_wrapper(zapier)
+agent = initialize_agent(toolkit.get_tools(), llm, agent="zero-shot-react-description", verbose=True)
+os.environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
+
+st.sidebar.header("Schedule Interview")
+person_name = st.sidebar.text_input("Enter Person's Name", "")
+person_email = st.sidebar.text_input("Enter Person's Email Address", "")
+schedule_button = st.sidebar.button("Schedule Interview")
+
+# Check if the button is clicked and the inputs are not empty
+if schedule_button and person_name and person_email:
+    # Create the combined string
+    call_action = "Schedule a virtual meeting with the email above based on calendar availability. Type up a professional email draft to the person notifying them that they have been selected for an interview with Hiring Plug at the scheduled date and time."
+    final_call = f"Name: {person_name}\nEmail: {person_email}\n\n{call_action}"
+    agent.run(final_call)
+    # Print or display the combined string
+    st.sidebar.success("Interview Scheduled Successfully!")
+    st.write("Combined String:")
+    st.code(combined_string)
