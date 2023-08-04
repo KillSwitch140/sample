@@ -147,10 +147,10 @@ if schedule_button and person_name and person_email and date and time:
     # Create the combined string
     meeting_title = f"Hiring Plug Interview with {person_email}"
     date_time = f"{date} at {time}"
-    schedule_meet = f"Schedule a virtual Google Meet titled {meeting_title} on {date_time}. Add this meeting as an event in my calendar"
+    schedule_meet = f"Schedule a 30 min virtual Google Meet titled {meeting_title} on {date_time}. Add this meeting as an event in my calendar"
     send_email = (
         f"Draft a well formatted, professional email to {person_email} notifying {person_name} that they have been selected\ "
-        f"for an interview with Hiring Plug. Please search my calendar for Hiring Plug Interview with {person_email} and provide the respective meeting details, and ask if the "
+        f"for an interview with Hiring Plug. Please search my calendar for 'Hiring Plug Interview with {person_email}' and provide the respective meeting details, and ask if the "
         f"meeting timings are suitable for ."
         f"Subject: Hiring Plug Interview \n\n"
         f"Dear {person_name},\n\n"
