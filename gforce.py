@@ -1,4 +1,5 @@
 import streamlit as st
+import datetime
 import os
 from os import environ
 import PyPDF2
@@ -134,7 +135,8 @@ import streamlit as st
 st.sidebar.header("Schedule Interview")
 person_name = st.sidebar.text_input("Enter Person's Name", "")
 person_email = st.sidebar.text_input("Enter Person's Email Address", "")
-date_time = st.sidebar.datetime_input("Select Date and Time for Interview")
+date = st.sidebar.date_input("Select Date for Interview",help="DD/MM/YYYY"))
+time = st.sidebar.time_input("Select Time for Interview")
 schedule_button = st.sidebar.button("Schedule Interview")
 
 # Initialize a flag to check if the meeting has been successfully scheduled
@@ -144,6 +146,7 @@ meeting_scheduled = False
 if schedule_button and person_name and person_email and date_time:
     # Create the combined string
     meeting_title = f"Hiring Plug Interview with {person_email}"
+    date_time = f"{date} at {time}"
     schedule_meet = f"Schedule a virtual Google Meet titled {meeting_title} on {date_time}. Add this meeting as an event in my calendar"
     send_email = (
         f"Draft a detailed professional email to {person_email} notifying {person_name} that they have been selected "
