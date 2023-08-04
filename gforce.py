@@ -18,6 +18,7 @@ import pysqlite3
 from langchain.chat_models import ChatOpenAI
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+import qdrant_client
 from qdrant_client import QdrantClient,models
 from qdrant_client.http.models import PointStruct
 from langchain.agents import initialize_agent
