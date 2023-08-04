@@ -128,20 +128,39 @@ toolkit = ZapierToolkit.from_zapier_nla_wrapper(zapier)
 agent = initialize_agent(toolkit.get_tools(), llm, agent="zero-shot-react-description", verbose=True)
 
 
+import streamlit as st
+
+# Create a sidebar with text input boxes and a button
 st.sidebar.header("Schedule Interview")
 person_name = st.sidebar.text_input("Enter Person's Name", "")
 person_email = st.sidebar.text_input("Enter Person's Email Address", "")
 date_time = st.sidebar.datetime_input("Select Date and Time for Interview")
 schedule_button = st.sidebar.button("Schedule Interview")
 
+# Initialize a flag to check if the meeting has been successfully scheduled
+meeting_scheduled = False
+
 # Check if the button is clicked and the inputs are not empty
-if schedule_button and person_name and person_email:
+if schedule_button and person_name and person_email and date_time:
     # Create the combined string
     meeting_title = f"Hiring Plug Interview with {person_email}"
-    call_action = f"Schedule a virtual Google Meet titled {meeting_title} on {date_time}."
+    schedule_meet = f"Schedule a virtual Google Meet titled {meeting_title} on {date_time}. Add this meeting as an event in my calendar"
+    send_email = (
+        f"Draft a detailed professional email to {person_email} notifying {person_name} that they have been selected "
+        f"for an interview with Hiring Plug. Please search my calendar for Hiring Plug Interview with {person_email} and provide the respective meeting details, and ask if the "
+        f"meeting timings are suitable for {person_name}."
+    )
 
-    agent.run(call_action)
-    # Print or display the combined string
-    st.sidebar.success("Interview Scheduled Successfully!")
-    st.write("Combined String:")
-    st.code(combined_string)
+    # Execute the agent.run function for scheduling the meeting
+    agent.run(schedule_meet)
+    meeting_scheduled = True
+
+# Check if the meeting has been successfully scheduled
+if meeting_scheduled:
+    # Execute the agent.run function for sending the email
+    agent.run(send_email)
+
+# Print or display the combined string
+st.sidebar.success("Interview Scheduled Successfully!")
+st.write("Scheduled Action:")
+st.code(schedule_meet)
