@@ -68,7 +68,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     llm,
     retriever=retriever,
     return_source_documents=True,
-    answer_prompt=prompt
+    prompt=prompt
     )
 
     # Generate response
