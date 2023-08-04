@@ -17,4 +17,4 @@ tensorflow
 tensorflow-hub
 pypdf
 InstructorEmbedding
-qdrant-client
+qdrant_client
