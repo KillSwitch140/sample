@@ -39,9 +39,6 @@ def read_pdf_text(uploaded_file):
 
 def generate_response(doc_texts, openai_api_key, query_text):
 
-    
-   
-    
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1,openai_api_key=openai_api_key)
     # Split documents into chunks
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -62,7 +59,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
         llm=llm,
         retriever=retriever,
         memory=memory
-    ))
+    )
 
     # Generate response
     response = qa.run(query_text)
