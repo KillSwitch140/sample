@@ -27,7 +27,7 @@ def schedule_interview(person_name, person_email, date, time):
 
     # Execute the agent.run function for scheduling the meeting
     agent.run(schedule_meet)
-    time.sleep(5)  # Add a 5-second delay
+    
     # Execute the agent.run function for sending the email
     agent.run(send_email)
 
