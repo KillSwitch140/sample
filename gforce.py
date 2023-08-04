@@ -150,7 +150,7 @@ if schedule_button and person_name and person_email and date and time:
     schedule_meet = f"Schedule a 30 min virtual Google Meet titled {meeting_title} on {date_time}. Add the created meeting's details as a new event in my calendar"
     send_email = (
         f"Draft a well formatted, professional email to {person_email} notifying {person_name} that they have been selected\ "
-        f"for an interview with Hiring Plug. Please search my calendar for 'Hiring Plug Interview with {person_name}' and provide the respective meeting details, and ask if the "
+        f"for an interview with Hiring Plug. Please search my calendar for 'Hiring Plug Interview with {person_name}' and provide the respective meeting details"
     
     )
 
