@@ -68,7 +68,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     embeddings,
     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333",
     prefer_grpc=True,
-    api_key=api_key,
+    api_key=st.secrets["QDRANT_API_KEY"],
     collection_name="resume",
     force_recreate=True,
 )
