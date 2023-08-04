@@ -81,7 +81,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
         chain_type="stuff",
         memory=memory,
         chain_type_kwargs={
-            "prompt": prompt,
+            "prompt": prompt
         }
     )
     # Generate response
