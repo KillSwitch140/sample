@@ -43,7 +43,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1)
     # Split documents into chunks
-    text_splitter = RecursiveCharacterTextSplitte(chunk_size=1000, chunk_overlap=0)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.create_documents(doc_texts)
 
     # Select embeddings
