@@ -9,11 +9,10 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.prompts import (
-    ChatPromptTemplate,
-    PromptTemplate,
     SystemMessagePromptTemplate,
-    AIMessagePromptTemplate,
     HumanMessagePromptTemplate,
+    ChatPromptTemplate,
+    MessagesPlaceholder
 )
 from langchain.schema import (
     AIMessage,
