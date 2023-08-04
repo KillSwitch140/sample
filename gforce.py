@@ -40,11 +40,8 @@ def read_pdf_text(uploaded_file):
  
 
 def generate_response(doc_texts, openai_api_key, query_text):
-    input_dict = {
-    "human_input": query_text, 
-    "chat_history": "Previous conversation...",
-    "context":  doc_texts
-    }
+    human_input: query_text, 
+    
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1,openai_api_key=openai_api_key)
     # Split documents into chunks
@@ -60,36 +57,26 @@ def generate_response(doc_texts, openai_api_key, query_text):
     # Create retriever interface
     retriever = db.as_retriever()
     #Bot memory
-    memory = ConversationBufferMemory(memory_key="chat_history",return_messages="True",input_key=query_text)
+    memory = ConversationBufferMemory(memory_key="chat_history",return_messages="True",input_key=)
 
-    TEMPLATE = """You are a hiring manager's helpful assistant that reads multiple resumes of candidates and answers any questions related to the candidates,\
-        You are chatbot that talks in a professional tone \
-        Only answer the quesions truthfully and accurate do not provide further details.\
-        If you don't know the answer, just say that you don't know, don't try to make up an answer.\
-        If you are asked to summarize a candidate'sresume, summarize it in 5 sentences, 3 sentences for their experience and projects, 1 sentence for their education and 1 sentence for their skills\
-        If you are asked to compare candidates just provide the summarization of their resumes
-                        
-        {context}
+    template = """You are an AI assistant helping interview candidates. Given the resumes and interview chat history, answer the interviewer's question.
 
-        The chat history so far: ```{chat_history}```
+Resumes:
+{context}
+Previous Chat:
+{chat_history}
+Interviewer: {human_input}
+AI:
+"""
 
-        The customer's latest message: ```{human_input}```
-    """
+prompt = PromptTemplate(template=template, input_variables=["context", "chat_history", "human_input"])
 
-    PROMPT_TEMPLATE = ChatPromptTemplate.from_template(TEMPLATE)
-    prompt = PromptTemplate(
-            input_variables=["chat_history", "human_input", "context"], template=TEMPLATE
-            )
-    # Create QA chain
-    qa =RetrievalQA.from_chain_type(
-        llm=llm,
-        retriever=retriever,
-        chain_type="stuff",
-        memory=memory,
-        chain_type_kwargs={
-            "prompt": prompt
-        }
-    )
+qa_chain = ConversationalRetrievalChain(
+    retriever=retriever, 
+    llm=llm,
+    prompt=prompt,
+    memory=memory
+)
     # Generate response
     response = qa.run(query_text)
 
