@@ -135,7 +135,7 @@ import streamlit as st
 st.sidebar.header("Schedule Interview")
 person_name = st.sidebar.text_input("Enter Person's Name", "")
 person_email = st.sidebar.text_input("Enter Person's Email Address", "")
-date = st.sidebar.date_input("Select Date for Interview",placeholder=="DD/MM/YYYY"))
+date = st.sidebar.date_input("Select Date for Interview",placeholder=="DD/MM/YYYY")
 time = st.sidebar.time_input("Select Time for Interview")
 schedule_button = st.sidebar.button("Schedule Interview")
 
@@ -159,9 +159,8 @@ if schedule_button and person_name and person_email and date_time:
     meeting_scheduled = True
 
 # Check if the meeting has been successfully scheduled
-if meeting_scheduled:
-    # Execute the agent.run function for sending the email
-    agent.run(send_email)
+    if meeting_scheduled:
+        agent.run(send_email)
 
 # Print or display the combined string
 st.sidebar.success("Interview Scheduled Successfully!")
