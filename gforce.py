@@ -70,11 +70,12 @@ def generate_response(doc_texts, openai_api_key, query_text):
     prompt = PromptTemplate(template=template, input_variables=["context", "chat_history", "human_input"])
     
     qa_chain = ConversationalRetrievalChain(
-        retriever=retriever, 
-        llm=llm,
-        prompt=prompt,
-        memory=memory
-    )
+                combine_docs_chain = TextConcatenationChain(),
+                  question_generator = FAQQuestionGenerator(),
+                  llm = llm,
+                  prompt = prompt,
+                  memory = memory
+                )
     # Generate response
     response = qa.run(query_text)
     return response
