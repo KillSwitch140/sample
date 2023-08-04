@@ -64,7 +64,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     # QA_CHAIN_PROMPT.format(query= query_text)
     #Create QA chain 
     qa = ConversationalRetrievalChain.from_llm(llm=llm,retriever=retriever,memory=memory)
-    response = qa_chain.run(query_text})
+    response = qa_chain.run(query_text)
     
     return response
     
