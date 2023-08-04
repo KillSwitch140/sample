@@ -73,7 +73,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     force_recreate=True,
 )
     # Create retriever interface
-    retriever = qdrant.as_retriever(search_type="similarity")
+    retriever = qdrant.as_retriever(search_type="mmr")
     #Bot memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     # template  = """
