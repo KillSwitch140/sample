@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+from os import environ
 import PyPDF2
 from langchain.agents import initialize_agent
 from langchain.agents.agent_toolkits import ZapierToolkit
@@ -24,7 +25,7 @@ from langchain.utilities.zapier import ZapierNLAWrapper
 
 
 zapier_nla_api_key = st.secrets["ZAP_API_KEY"]
-os.environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
+environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 # client = QdrantClient(
@@ -130,13 +131,15 @@ agent = initialize_agent(toolkit.get_tools(), llm, agent="zero-shot-react-descri
 st.sidebar.header("Schedule Interview")
 person_name = st.sidebar.text_input("Enter Person's Name", "")
 person_email = st.sidebar.text_input("Enter Person's Email Address", "")
+date_time = st.sidebar.datetime_input("Select Date and Time for Interview")
 schedule_button = st.sidebar.button("Schedule Interview")
 
 # Check if the button is clicked and the inputs are not empty
 if schedule_button and person_name and person_email:
     # Create the combined string
-    call_action = "Schedule a virtual meeting with the email above based on calendar availability. Type up a professional email draft to the person notifying them that they have been selected for an interview with Hiring Plug at the scheduled date and time."
-    final_call = f"Name: {person_name}\nEmail: {person_email}\n\n{call_action}"
+    meeting_title = f"Hiring Plug Interview with {person_email}"
+    call_action = f"Schedule a virtual Google Meet titled {meeting_title} on {date_time}."
+
     agent.run(final_call)
     # Print or display the combined string
     st.sidebar.success("Interview Scheduled Successfully!")
