@@ -59,25 +59,24 @@ def generate_response(doc_texts, openai_api_key, query_text):
 
     template = """You are an AI assistant helping interview candidates. Given the resumes and interview chat history, answer the interviewer's question.
 
-Resumes:
-{context}
-Previous Chat:
-{chat_history}
-Interviewer: {human_input}
-AI:
-"""
-
-prompt = PromptTemplate(template=template, input_variables=["context", "chat_history", "human_input"])
-
-qa_chain = ConversationalRetrievalChain(
-    retriever=retriever, 
-    llm=llm,
-    prompt=prompt,
-    memory=memory
-)
+    Resumes:
+    {context}
+    Previous Chat:
+    {chat_history}
+    Interviewer: {human_input}
+    AI:
+    """
+    
+    prompt = PromptTemplate(template=template, input_variables=["context", "chat_history", "human_input"])
+    
+    qa_chain = ConversationalRetrievalChain(
+        retriever=retriever, 
+        llm=llm,
+        prompt=prompt,
+        memory=memory
+    )
     # Generate response
     response = qa.run(query_text)
-
     return response
     
 # Store LLM generated responses
