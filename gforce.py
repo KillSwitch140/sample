@@ -41,27 +41,28 @@ def generate_response(doc_texts, openai_api_key, query_text):
     
     
     
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1)
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1,openai_api_key=openai_api_key)
     # Split documents into chunks
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.create_documents(doc_texts)
 
     # Select embeddings
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    
+
     # Create a vectorstore from documents
     db = Chroma.from_documents(texts, embeddings)
 
     # Create retriever interface
     retriever = db.as_retriever()
+
     # Create QA chain
-    qa_chain = RetrievalQA.from_chain_type(llm,retriever=retriever,return_source_documents=True)
+    qa = RetrievalQA.from_chain_type(llm=llm, chain_type='stuff', retriever=retriever)
 
     # Generate response
-    response = qa_chain.run(query_text)
+    response = qa.run(query_text)
 
     return response
-
+    
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": "Hi, I am your resume Q&A bot. How can I help you today?"}]
