@@ -23,6 +23,7 @@ from langchain.utilities.zapier import ZapierNLAWrapper
 
 
 zapier_nla_api_key = st.secrets["ZAP_API_KEY"]
+os.environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 # client = QdrantClient(
@@ -118,12 +119,12 @@ def clear_chat_history():
 
 st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
-os.environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
+
 llm = OpenAI(temperature=0)
 zapier = ZapierNLAWrapper()
 toolkit = ZapierToolkit.from_zapier_nla_wrapper(zapier)
 agent = initialize_agent(toolkit.get_tools(), llm, agent="zero-shot-react-description", verbose=True)
-os.environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
+
 
 st.sidebar.header("Schedule Interview")
 person_name = st.sidebar.text_input("Enter Person's Name", "")
