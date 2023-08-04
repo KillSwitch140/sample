@@ -37,11 +37,16 @@ def read_pdf_text(uploaded_file):
         text += page.extract_text()
 
     return text
+
+prompt = """
+You are an AI assistant created to help hiring managers review resumes and shortlist candidates. You have been provided with resumes and job descriptions to review. When asked questions, use the provided documents to provide helpful and relevant information to assist the hiring manager. Be concise, polite and professional. Do not provide any additional commentary or opinions beyond answering the questions directly based on the provided documents.
+"""
  
 
 def generate_response(doc_texts, openai_api_key, query_text):
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1,openai_api_key=openai_api_key)
+     llm.add_prompt(prompt)
     # Split documents into chunks
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.create_documents(doc_texts)
@@ -58,11 +63,9 @@ def generate_response(doc_texts, openai_api_key, query_text):
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages="True")
 
     # Create the RetrievalQA chain
-    qa_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, memory=memory)
+    qa_chain = ConversationalRetrievalChain.from_llm(llm=llm, chain_type="stuff", retriever=retriever, memory=memory)
     
-    prompt = "Act as a hiring manager's assistant and answer the query using the provided documents. Query: " + query_text
-    
-    response = qa_chain.run(prompt=prompt)
+    response = qa_chain.run(query_text)
     
     return response
     
