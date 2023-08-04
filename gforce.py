@@ -34,7 +34,7 @@ client = QdrantClient(
 
 client.recreate_collection(
     collection_name="resume_bot",
-    vectors_config=VectorParams(size=1000, distance=Distance.COSINE),
+    vectors_config=models.VectorParams(size=1000, distance=models.Distance.COSINE),
 )
 
 def read_pdf_text(uploaded_file):
