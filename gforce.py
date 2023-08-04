@@ -22,6 +22,7 @@ import qdrant_client
 from qdrant_client import QdrantClient,models
 from qdrant_client.http.models import PointStruct
 from langchain.agents import initialize_agent
+from langchain.vectorstores import Qdrant
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 os.environ['QDRANT_COLLECTION'] ="resume"
@@ -38,6 +39,8 @@ collection_config = qdrant_client.http.models.VectorParams(
 client.recreate_collection(
    collection_name=os.getenv("QDRANT_COLLECTION"),
     vectors_config=collection_config)
+
+
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -59,16 +62,15 @@ def generate_response(doc_texts, openai_api_key, query_text):
     # Select embeddings
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     
+    # Create a vectorstore from documents
     vectorstore = Qdrant(
         client=client,
         collection_name=os.getenv("QDRANT_COLLECTION_NAME"),
         embeddings=embeddings
     )
-    # Create a vectorstore from documents
     vectorstore.add_documents(texts)
-
     # Create retriever interface
-    retriever = db.as_retriever(search_type="similarity")
+    retriever = vectorstore.as_retriever(search_type="similarity")
     #Bot memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     # template  = """
