@@ -81,7 +81,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi, I am your resume Q&A bot. How can I help you today?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "You are a AI assistant created to help hiring managers review resumes and shortlist candidates. You have been provided with resumes and job descriptions to review. When asked questions, use the provided documents to provide helpful and relevant information to assist the hiring manager. Be concise, polite and professional. Do not provide any additional commentary or opinions beyond answering the questions directly based on the provided documents."}]
 
 # Page title
 st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
@@ -129,6 +129,29 @@ def clear_chat_history():
     uploaded_files.clear()
     query_text = ""
     st.empty()  # Clear the chat display
+
+# Display the chat messages at the bottom of the page
+st.markdown(
+    """
+    <style>
+    /* Set the position of the chat messages */
+    .chat-messages {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Container to display the chat messages
+with st.container(class_="chat-messages"):
+    for message in st.session_state.chat_placeholder:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
 
 st.button('Clear Chat History', on_click=clear_chat_history)
 
