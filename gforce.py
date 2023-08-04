@@ -40,8 +40,6 @@ def read_pdf_text(uploaded_file):
  
 
 def generate_response(doc_texts, openai_api_key, query_text):
-    human_input: query_text, 
-    
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1,openai_api_key=openai_api_key)
     # Split documents into chunks
