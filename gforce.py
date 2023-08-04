@@ -15,6 +15,12 @@ import pysqlite3
 from langchain.chat_models import ChatOpenAI
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+from qdrant_client import QdrantClient
+
+qdrant_client = QdrantClient(
+    url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
+    api_key=st.secrets["QDRANT_API_KEY"],
+)
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
