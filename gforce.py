@@ -27,18 +27,18 @@ from langchain.agents import initialize_agent
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
-client = QdrantClient(
-    url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
-    api_key=st.secrets["QDRANT_API_KEY"],
-)
-collection_config = qdrant_client.http.models.VectorParams(
-        size=1536, # 768 for instructor-xl, 1536 for OpenAI
-        distance=qdrant_client.http.models.Distance.COSINE
-    )
-client.recreate_collection(
-    collection_name="resume_bot",
-    vectors_config=collection_config, distance=models.Distance.COSINE),
-)
+# client = QdrantClient(
+#     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
+#     api_key=st.secrets["QDRANT_API_KEY"],
+# )
+# collection_config = qdrant_client.http.models.VectorParams(
+#         size=1536, # 768 for instructor-xl, 1536 for OpenAI
+#         distance=qdrant_client.http.models.Distance.COSINE
+#     )
+# client.recreate_collection(
+#     collection_name="resume_bot",
+#     vectors_config=collection_config, distance=models.Distance.COSINE),
+# )
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
