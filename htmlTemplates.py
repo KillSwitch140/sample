@@ -1,44 +1,31 @@
-css = '''
-<style>
-.chat-message {
-    padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; display: flex
-}
-.chat-message.user {
-    background-color: #2b313e
-}
-.chat-message.bot {
-    background-color: #475063
-}
-.chat-message .avatar {
-  width: 20%;
-}
-.chat-message .avatar img {
-  max-width: 78px;
-  max-height: 78px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.chat-message .message {
-  width: 80%;
-  padding: 0 1.5rem;
-  color: #fff;
-}
-'''
+from langchain.llms import OpenAI
+from langchain.agents import initialize_agent
+from langchain.agents.agent_toolkits import ZapierToolkit
+from langchain.utilities.zapier import ZapierNLAWrapper
+import os
+import time
 
-bot_template = '''
-<div class="chat-message bot">
-    <div class="avatar">
-        <img src="https://i.ibb.co/cN0nmSj/Screenshot-2023-05-28-at-02-37-21.png" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
-    </div>
-    <div class="message">{{MSG}}</div>
-</div>
-'''
 
-user_template = '''
-<div class="chat-message user">
-    <div class="avatar">
-        <img src="https://i.ibb.co/rdZC7LZ/Photo-logo-1.png">
-    </div>    
-    <div class="message">{{MSG}}</div>
-</div>
-'''
+os.environ["ZAPIER_NLA_API_KEY"] = 'YourZapierAPIKeyHere'
+llm = OpenAI(temperature=0)
+zapier = ZapierNLAWrapper()
+toolkit = ZapierToolkit.from_zapier_nla_wrapper(zapier)
+agent = initialize_agent(toolkit.get_tools(), llm, agent="zero-shot-react-description", verbose=True)
+
+def schedule_interview(person_name, person_email, date, time):
+    # Create the combined string
+    meeting_title = f"Hiring Plug Interview with {person_email}"
+    date_time = f"{date} at {time}"
+    schedule_meet = f"Schedule a 30 min virtual Google Meet titled {meeting_title} on {date_time}. Add the created meeting's details as a new event in my calendar"
+    send_email = (
+        f"Draft a well formatted, professional email to {person_email} notifying {person_name} that they have been selected "
+        f"for an interview with Hiring Plug. Please search my calendar for 'Hiring Plug Interview with {person_name}' and provide the respective meeting details."
+    )
+
+    # Execute the agent.run function for scheduling the meeting
+    agent.run(schedule_meet)
+    time.sleep(5)  # Add a 5-second delay
+    # Execute the agent.run function for sending the email
+    agent.run(send_email)
+
+    return True  # Return True if the interview is scheduled and the email is sent successfully
