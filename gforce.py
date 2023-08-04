@@ -20,15 +20,11 @@ import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from qdrant_client import QdrantClient,models
 from qdrant_client.http.models import PointStruct
-from langchain.llms import OpenAI
 from langchain.agents import initialize_agent
-from langchain.agents.agent_toolkits import ZapierToolkit
-from langchain.utilities.zapier import ZapierNLAWrapper
-from zap import schedule_interview
 
 
-zapier_nla_api_key = st.secrets["ZAP_API_KEY"]
-environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
+
+
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 client = QdrantClient(
@@ -122,16 +118,7 @@ def clear_chat_history():
     query_text = ""
     st.empty()  # Clear the chat display
 
-st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
-
-
-llm = OpenAI(temperature=0)
-zapier = ZapierNLAWrapper()
-toolkit = ZapierToolkit.from_zapier_nla_wrapper(zapier)
-agent = initialize_agent(toolkit.get_tools(), llm, agent="zero-shot-react-description", verbose=True)
-
-
-
+st.button('Clear Chat History', on_click=clear_chat_history)
 
 # Create a sidebar with text input boxes and a button
 st.sidebar.header("Schedule Interview")
@@ -158,8 +145,3 @@ if schedule_button:
             st.sidebar.success("Interview Scheduled Successfully!")
         else:
             st.sidebar.error("Failed to Schedule Interview")
-
-    
-
-
-
