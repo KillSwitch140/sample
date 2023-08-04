@@ -27,8 +27,11 @@ def schedule_interview(person_name, person_email, date, time):
 
     # Execute the agent.run function for scheduling the meeting
     agent.run(schedule_meet)
-    
-    # Execute the agent.run function for sending the email
-    agent.run(send_email)
-
-    return True  # Return True if the interview is scheduled and the email is sent successfully
+    if agent.succeeded:
+        # Execute the agent.run function for sending the email
+        agent.run(send_email)
+        return True  # Return True if the interview is scheduled and the email is sent successfully
+    else:
+        return False
+   
+   
