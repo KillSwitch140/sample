@@ -19,7 +19,7 @@ from langchain.schema import (
     HumanMessage,
     SystemMessage
 )
-
+from langchain import PromptTemplate
 import pysqlite3
 from langchain.chat_models import ChatOpenAI
 import sys
@@ -38,14 +38,15 @@ def read_pdf_text(uploaded_file):
  
 
 def generate_response(doc_texts, openai_api_key, query_text):
+
     
-    
+   
     
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1,openai_api_key=openai_api_key)
     # Split documents into chunks
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     texts = text_splitter.create_documents(doc_texts)
-
+    
     # Select embeddings
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
@@ -54,9 +55,14 @@ def generate_response(doc_texts, openai_api_key, query_text):
 
     # Create retriever interface
     retriever = db.as_retriever()
-
+    #Bot memory
+    memory = ConversationBufferMemory(memory_key="chat_history", input_key="human_input",return_messages="True")
     # Create QA chain
-    qa = RetrievalQA.from_chain_type(llm=llm, chain_type='stuff', retriever=retriever)
+    qa = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=retriever,
+        memory=memory
+    ))
 
     # Generate response
     response = qa.run(query_text)
