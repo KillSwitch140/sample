@@ -40,15 +40,25 @@ def read_pdf_text(uploaded_file):
 
 def generate_response(doc_texts, openai_api_key, query_text):
     
-    template = """You are a hiring manager's helpful assistant that reads multiple resumes of candidates and answers any questions related to the candidates,\
+    TEMPLATE = """You are a hiring manager's helpful assistant that reads multiple resumes of candidates and answers any questions related to the candidates,\
                         You are chatbot that talks in a professional, polite and respectful tone. \
                         Only answer the quesions truthfully and accurately. \
                         If you don't know the answer, just say that you don't know, don't try to make up an answer.\
                         If you are asked to summarize a candidate'sresume, summarize it in 5 sentences, 3 sentences for their experience and projects, 1 sentence for their education and 1 sentence for their skills.\
                         If you are asked to compare candidates just provide the summarization of their resumes.
-                        If hiring manager asks you to select/ choose/ recommend the best/top candidate then select the best candidate based on the hiring manager's requiremenst for the role and provide their name, email and a brief of their qualifications """
+                        If hiring manager asks you to select/ choose/ recommend the best/top candidate then select the best candidate based on the hiring manager's requiremenst for the role and provide their name, email and a brief of their qualifications 
+                        {context}
+
+                        The chat history so far: ```{chat_history}```
+
+                        The customer's latest message: ```{human_input}```
+
+                """
     
-    prompt = PromptTemplate.from_template(template)
+    PROMPT_TEMPLATE = ChatPromptTemplate.from_template(TEMPLATE)
+    prompt = PromptTemplate(
+            input_variables=["chat_history", "human_input", "context"], template=TEMPLATE
+            )
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1)
     # Split documents into chunks
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
