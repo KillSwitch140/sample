@@ -78,6 +78,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     # Create QA chain
     qa =RetrievalQA.from_chain_type(
         llm=llm,
+        retriever=retriever,
         chain_type="stuff",
         memory=memory,
         chain_type_kwargs={
