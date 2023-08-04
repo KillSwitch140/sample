@@ -63,7 +63,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     
     # Create a vectorstore from documents
-    Qdrant.from_documents(
+    vectorstore = Qdrant.from_documents(
     texts, embeddings)
     # Create retriever interface
     retriever = vectorstore.as_retriever(search_type="similarity")
