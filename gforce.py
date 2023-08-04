@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 import PyPDF2
 from langchain.agents import initialize_agent
 from langchain.agents.agent_toolkits import ZapierToolkit
