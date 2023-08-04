@@ -93,16 +93,9 @@ uploaded_files = st.file_uploader('Upload PDF(s)', type=['pdf'], accept_multiple
 # Query text
 query_text = st.text_input('Enter your question:', placeholder='Please provide a short summary.')
 
-# Chat display area with automatic scrolling
-chat_display = st.empty()
-scrolling_style = """
-<style>
-    #root {
-        scroll-behavior: smooth;
-    }
-</style>
-"""
-chat_display.markdown(scrolling_style, unsafe_allow_html=True)
+# Initialize chat placeholder as an empty list
+if "chat_placeholder" not in st.session_state.keys():
+    st.session_state.chat_placeholder = []
 
 # Form input and query
 if st.button('Submit', key='submit_button'):
@@ -118,10 +111,21 @@ if st.button('Submit', key='submit_button'):
             for message in st.session_state.chat_placeholder:
                 with st.chat_message(message["role"]):
                     st.write(message["content"])
-                    st.experimental_rerun()
-
         else:
             st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
+# Fixed position for query input at the bottom
+st.markdown(
+    """
+    <style>
+    .css-17eq0hr {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
@@ -129,29 +133,6 @@ def clear_chat_history():
     uploaded_files.clear()
     query_text = ""
     st.empty()  # Clear the chat display
-
-# Display the chat messages at the bottom of the page
-st.markdown(
-    """
-    <style>
-    /* Set the position of the chat messages */
-    .chat-messages {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        overflow-y: auto;
-        padding: 10px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Container to display the chat messages
-with st.container(class_="chat-messages"):
-    for message in st.session_state.chat_placeholder:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])
 
 st.button('Clear Chat History', on_click=clear_chat_history)
 
