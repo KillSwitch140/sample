@@ -37,8 +37,7 @@ collection_config = qdrant_client.http.models.VectorParams(
     )
 client.recreate_collection(
    collection_name=os.getenv("QDRANT_COLLECTION"),
-    vectors_config=collection_config),
-)
+    vectors_config=collection_config)
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
