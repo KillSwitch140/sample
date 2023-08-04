@@ -23,7 +23,7 @@ client = QdrantClient(
 )
 
 client.recreate_collection(
-    collection_name="test_collection",
+    collection_name="resume_bot",
     vectors_config=VectorParams(size=4, distance=Distance.DOT),
 )
 
@@ -56,12 +56,17 @@ def generate_response(doc_texts, openai_api_key, query_text):
     retriever = db.as_retriever()
     #Bot memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    # template  = """
-    #         You are an AI assistant created to help hiring managers review resumes and shortlist candidates. You have been provided with resumes and job descriptions to review. When asked questions, use the provided documents to provide helpful and relevant information to assist the hiring manager. Be concise, polite and professional. Do not provide any additional commentary or opinions beyond answering the questions directly based on the provided documents.
-    #         """
-    # QA_CHAIN_PROMPT = PromptTemplate.from_template(template)
-    # Create QA chain 
-    qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, memory=memory)
+    template  = """
+            You are an AI assistant created to help hiring managers review resumes and shortlist candidates. You have been provided with resumes and job descriptions to review. When asked questions, use the provided documents to provide helpful and relevant information to assist the hiring manager. Be concise, polite and professional. Do not provide any additional commentary or opinions beyond answering the questions directly based on the provided documents.
+            Question:{query}
+    """
+    QA_CHAIN_PROMPT = PromptTemplate.from_template(template,input_variables=['query'])
+    QA_CHAIN_PROMPT.format((query= query_text)
+    #Create QA chain 
+    qa = RetrievalQA.from_chain_type(llm=llm,
+                                       retriever=retriever,
+                                       return_source_documents=True,
+                                       chain_type_kwargs={"prompt": QA_CHAIN_PROMPT})
 
     response = qa_chain.run({"query": query_text})
     
