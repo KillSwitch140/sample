@@ -140,7 +140,7 @@ if schedule_button and person_name and person_email:
     meeting_title = f"Hiring Plug Interview with {person_email}"
     call_action = f"Schedule a virtual Google Meet titled {meeting_title} on {date_time}."
 
-    agent.run(final_call)
+    agent.run(call_action)
     # Print or display the combined string
     st.sidebar.success("Interview Scheduled Successfully!")
     st.write("Combined String:")
