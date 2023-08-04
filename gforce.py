@@ -23,11 +23,10 @@ from qdrant_client import QdrantClient,models
 from qdrant_client.http.models import PointStruct
 from langchain.agents import initialize_agent
 
-
-
-
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 os.environ['QDRANT_COLLECTION'] ="resume"
+
+
 client = QdrantClient(
     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
     api_key=st.secrets["QDRANT_API_KEY"],
