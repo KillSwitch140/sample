@@ -87,32 +87,6 @@ if "messages" not in st.session_state.keys():
 st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
 st.title('Gforce Resume Assistant')
 
-# File upload
-uploaded_files = st.file_uploader('Upload PDF(s)', type=['pdf'], accept_multiple_files=True)
-
-# Query text
-query_text = st.text_input('Enter your question:', placeholder='Please provide a short summary.')
-
-# Initialize chat placeholder as an empty list
-if "chat_placeholder" not in st.session_state.keys():
-    st.session_state.chat_placeholder = []
-
-# Form input and query
-if st.button('Submit', key='submit_button'):
-    if openai_api_key.startswith('sk-'):
-        if uploaded_files and query_text:
-            documents = [read_pdf_text(file) for file in uploaded_files]
-            with st.spinner('Chatbot is typing...'):
-                response = generate_response(documents, openai_api_key, query_text)
-                st.session_state.chat_placeholder.append({"role": "user", "content": query_text})
-                st.session_state.chat_placeholder.append({"role": "assistant", "content": response})
-
-            # Update chat display
-            for message in st.session_state.chat_placeholder:
-                with st.chat_message(message["role"]):
-                    st.write(message["content"])
-        else:
-            st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
 # Fixed position for query input at the bottom
 st.markdown(
     """
@@ -126,6 +100,25 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# Query input at the bottom of the page
+query_text = st.text_input('Enter your question:', key='query_input', placeholder='Please provide a short summary.')
+
+# File upload
+uploaded_files = st.file_uploader('Upload PDF(s)', type=['pdf'], accept_multiple_files=True)
+
+# Form input and query
+if st.button('Submit', key='submit_button'):
+    if openai_api_key.startswith('sk-'):
+        if uploaded_files and query_text:
+            documents = [read_pdf_text(file) for file in uploaded_files]
+            with st.spinner('Chatbot is typing...'):
+                response = generate_response(documents, openai_api_key, query_text)
+                st.session_state.messages.append({"role": "user", "content": query_text})
+                st.session_state.messages.append({"role": "assistant", "content": response})
+        else:
+            st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
+
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
