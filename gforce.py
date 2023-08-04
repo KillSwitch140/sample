@@ -26,19 +26,19 @@ from langchain.agents import initialize_agent
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-
-# client = QdrantClient(
-#     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
-#     api_key=st.secrets["QDRANT_API_KEY"],
-# )
-# collection_config = qdrant_client.http.models.VectorParams(
-#         size=1536, # 768 for instructor-xl, 1536 for OpenAI
-#         distance=qdrant_client.http.models.Distance.COSINE
-#     )
-# client.recreate_collection(
-#     collection_name="resume_bot",
-#     vectors_config=collection_config, distance=models.Distance.COSINE),
-# )
+os.environ['QDRANT_COLLECTION'] ="resume"
+client = QdrantClient(
+    url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
+    api_key=st.secrets["QDRANT_API_KEY"],
+)
+collection_config = qdrant_client.http.models.VectorParams(
+        size=1536,
+        distance=qdrant_client.http.models.Distance.COSINE
+    )
+client.recreate_collection(
+   collection_name=os.getenv("QDRANT_COLLECTION"),
+    vectors_config=collection_config),
+)
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
@@ -59,9 +59,14 @@ def generate_response(doc_texts, openai_api_key, query_text):
     
     # Select embeddings
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-
+    
+    vectorstore = Qdrant(
+        client=client,
+        collection_name=os.getenv("QDRANT_COLLECTION_NAME"),
+        embeddings=embeddings
+    )
     # Create a vectorstore from documents
-    db = Chroma.from_documents(texts, embeddings)
+    vectorstore.add_documents(texts)
 
     # Create retriever interface
     retriever = db.as_retriever(search_type="similarity")
