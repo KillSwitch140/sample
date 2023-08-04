@@ -147,23 +147,11 @@ if schedule_button and person_name and person_email and date and time:
     # Create the combined string
     meeting_title = f"Hiring Plug Interview with {person_email}"
     date_time = f"{date} at {time}"
-    schedule_meet = f"Schedule a 30 min virtual Google Meet titled {meeting_title} on {date_time}. Add this meeting as an event in my calendar"
+    schedule_meet = f"Schedule a 30 min virtual Google Meet titled {meeting_title} on {date_time}. Add the created meeting's details as a new event in my calendar"
     send_email = (
         f"Draft a well formatted, professional email to {person_email} notifying {person_name} that they have been selected\ "
-        f"for an interview with Hiring Plug. Please search my calendar for 'Hiring Plug Interview with {person_email}' and provide the respective meeting details, and ask if the "
-        f"meeting timings are suitable for ."
-        f"Subject: Hiring Plug Interview \n\n"
-        f"Dear {person_name},\n\n"
-        f"Congratulations! You have been selected for an interview with Hiring Plug for the  role.\n\n"
-        f"Interview Details:\n"
-        f"Date: {date}\n"
-        f"Time: {time}\n"
-        f"Location: Virtual (Google Meet)\n\n"
-        f"We are excited to discuss your skills and qualifications further. Your interview details have been added to our calendar. If the provided timing is not suitable, please let us know, and we will try our best to accommodate.\n\n"
-        f"We look forward to meeting you and learning more about your potential contributions to our team.\n\n"
-        f"Best regards,\n"
-        f"[Your Name]\n"
-        f"Hiring Plug Team"
+        f"for an interview with Hiring Plug. Please search my calendar for 'Hiring Plug Interview with {person_name}' and provide the respective meeting details, and ask if the "
+    
     )
 
     # Execute the agent.run function for scheduling the meeting
