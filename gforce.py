@@ -135,7 +135,7 @@ import streamlit as st
 st.sidebar.header("Schedule Interview")
 person_name = st.sidebar.text_input("Enter Person's Name", "")
 person_email = st.sidebar.text_input("Enter Person's Email Address", "")
-date = st.sidebar.date_input("Select Date for Interview",placeholder=="DD/MM/YYYY")
+date = st.sidebar.date_input("Select Date for Interview",placeholder="DD/MM/YYYY")
 time = st.sidebar.time_input("Select Time for Interview")
 schedule_button = st.sidebar.button("Schedule Interview")
 
