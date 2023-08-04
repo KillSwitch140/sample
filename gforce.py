@@ -149,17 +149,34 @@ if schedule_button and person_name and person_email and date and time:
     date_time = f"{date} at {time}"
     schedule_meet = f"Schedule a virtual Google Meet titled {meeting_title} on {date_time}. Add this meeting as an event in my calendar"
     send_email = (
-        f"Draft a detailed professional email to {person_email} notifying {person_name} that they have been selected "
+        f"Draft a well formatted, professional email to {person_email} notifying {person_name} that they have been selected\ "
         f"for an interview with Hiring Plug. Please search my calendar for Hiring Plug Interview with {person_email} and provide the respective meeting details, and ask if the "
         f"meeting timings are suitable for {person_name}."
+        f"Dear [Candidate's Name],
+
+Congratulations! You have been selected for an interview with Hiring Plug for the [Position Name] role.
+
+Interview Details:
+Date: [Date]
+Time: [Time]
+Location: Virtual (Google Meet)
+
+We are excited to discuss your skills and qualifications further. Your interview details have been added to our calendar. If the provided timing is not suitable, please let us know, and we will try our best to accommodate.
+
+We look forward to meeting you and learning more about your potential contributions to our team.
+
+Best regards,
+[Your Name]
+Hiring Plug Team
+"
     )
 
     # Execute the agent.run function for scheduling the meeting
     agent.run(schedule_meet)
     meeting_scheduled = True
     # Check if the meeting has been successfully scheduled
-    if meeting_scheduled:
-        agent.run(send_email)
+    time.sleep(5)
+    agent.run(send_email)
     # Print or display the combined string
     st.sidebar.success("Interview Scheduled Successfully!")
 
