@@ -64,7 +64,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     
     # Create a vectorstore from documents
     qdrant = Qdrant.from_documents(
-    docs,
+    texts,
     embeddings,
     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333",
     prefer_grpc=True,
