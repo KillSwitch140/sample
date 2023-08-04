@@ -98,8 +98,11 @@ if st.button('Submit', key='submit_button'):
         else:
             st.warning("Please upload one or more PDF files and enter a question to start the conversation.")
 
-# Clear chat history button
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
+    st.session_state.chat_placeholder = []
+    uploaded_files.clear()
+    query_text = ""
+    st.empty()  # Clear the chat display
 
 st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
