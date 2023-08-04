@@ -157,10 +157,12 @@ if schedule_button and person_name and person_email and date_time:
     # Execute the agent.run function for scheduling the meeting
     agent.run(schedule_meet)
     meeting_scheduled = True
-
-# Check if the meeting has been successfully scheduled
+    # Check if the meeting has been successfully scheduled
     if meeting_scheduled:
         agent.run(send_email)
+
+
+    
 
 # Print or display the combined string
 st.sidebar.success("Interview Scheduled Successfully!")
