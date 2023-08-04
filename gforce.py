@@ -50,8 +50,8 @@ def generate_response(doc_texts, openai_api_key, query_text):
                         
                 """)
     
-   human_msg_template = HumanMessagePromptTemplate.from_template(template="{input}")
-   prompt_template = ChatPromptTemplate.from_messages([system_msg_template, MessagesPlaceholder(variable_name="history"), human_msg_template])
+    human_msg_template = HumanMessagePromptTemplate.from_template(template="{input}")
+    prompt_template = ChatPromptTemplate.from_messages([system_msg_template, MessagesPlaceholder(variable_name="history"), human_msg_template])
     
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.1)
     # Split documents into chunks
