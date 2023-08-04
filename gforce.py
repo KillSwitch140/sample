@@ -67,7 +67,9 @@ def generate_response(doc_texts, openai_api_key, query_text):
     llm=llm, 
     chain_type='stuff', 
     retriever=retriever,
-    chain_type_kwargs={"prompt": prompt}
+    chain_type_kwargs={"prompt": prompt})
+
+    
     response = qa_chain.run(query_text)
     
     return response
