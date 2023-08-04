@@ -76,11 +76,13 @@ def generate_response(doc_texts, openai_api_key, query_text):
             input_variables=["chat_history", "human_input", "context"], template=TEMPLATE
             )
     # Create QA chain
-    qa = ConversationalRetrievalChain.from_llm(
+    qa =RetrievalQA.from_chain_type(
         llm=llm,
-        retriever=retriever,
+        chain_type="stuff",
         memory=memory,
-        prompt=prompt
+        chain_type_kwargs={
+            "prompt": prompt,
+        }
     )
     # Generate response
     response = qa.run(query_text)
