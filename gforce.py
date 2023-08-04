@@ -56,13 +56,32 @@ def generate_response(doc_texts, openai_api_key, query_text):
     retriever = db.as_retriever()
     #Bot memory
     memory = ConversationBufferMemory(memory_key="chat_history",return_messages="True",input_key=query_text)
+
+    TEMPLATE = """You are a hiring manager's helpful assistant that reads multiple resumes of candidates and answers any questions related to the candidates,\
+        You are chatbot that talks in a professional tone \
+        Only answer the quesions truthfully and accurate do not provide further details.\
+        If you don't know the answer, just say that you don't know, don't try to make up an answer.\
+        If you are asked to summarize a candidate'sresume, summarize it in 5 sentences, 3 sentences for their experience and projects, 1 sentence for their education and 1 sentence for their skills\
+        If you are asked to compare candidates just provide the summarization of their resumes
+                        
+        {context}
+
+        The chat history so far: ```{chat_history}```
+
+        The customer's latest message: ```{human_input}```
+    """
+
+    PROMPT_TEMPLATE = ChatPromptTemplate.from_template(TEMPLATE)
+    prompt = PromptTemplate(
+            input_variables=["chat_history", "human_input", "context"], template=TEMPLATE
+            )
     # Create QA chain
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=retriever,
-        memory=memory
+        memory=memory,
+        prompt=prompt
     )
-
     # Generate response
     response = qa.run(query_text)
 
