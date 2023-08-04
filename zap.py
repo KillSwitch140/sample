@@ -6,7 +6,10 @@ import os
 import time
 
 
-os.environ["ZAPIER_NLA_API_KEY"] = 'YourZapierAPIKeyHere'
+zapier_nla_api_key = st.secrets["ZAP_API_KEY"]
+environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
+openai_api_key = st.secrets["OPENAI_API_KEY"]
+
 llm = OpenAI(temperature=0)
 zapier = ZapierNLAWrapper()
 toolkit = ZapierToolkit.from_zapier_nla_wrapper(zapier)
