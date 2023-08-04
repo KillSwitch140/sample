@@ -63,10 +63,17 @@ def generate_response(doc_texts, openai_api_key, query_text):
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     
     # Create a vectorstore from documents
-    vectorstore = Qdrant.from_documents(
-    texts, embeddings)
+    qdrant = Qdrant.from_documents(
+    docs,
+    embeddings,
+    url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333",
+    prefer_grpc=True,
+    api_key=api_key,
+    collection_name="resume",
+    force_recreate=True,
+)
     # Create retriever interface
-    retriever = vectorstore.as_retriever(search_type="similarity")
+    retriever = qdrant.as_retriever(search_type="similarity")
     #Bot memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     # template  = """
