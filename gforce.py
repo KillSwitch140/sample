@@ -55,7 +55,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     # Create retriever interface
     retriever = db.as_retriever()
     #Bot memory
-    memory = ConversationBufferMemory(memory_key="chat_history",return_messages="True")
+    memory = ConversationBufferMemory(memory_key="chat_history",return_messages="True",input_key=query_text)
     # Create QA chain
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm,
