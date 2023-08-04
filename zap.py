@@ -1,3 +1,4 @@
+import streamlit as st
 from langchain.llms import OpenAI
 from langchain.agents import initialize_agent
 from langchain.agents.agent_toolkits import ZapierToolkit
