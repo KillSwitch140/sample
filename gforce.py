@@ -152,24 +152,18 @@ if schedule_button and person_name and person_email and date and time:
         f"Draft a well formatted, professional email to {person_email} notifying {person_name} that they have been selected\ "
         f"for an interview with Hiring Plug. Please search my calendar for Hiring Plug Interview with {person_email} and provide the respective meeting details, and ask if the "
         f"meeting timings are suitable for ."
-        f"Dear {person_name},
-
-Congratulations! You have been selected for an interview with Hiring Plug for the role.
-
-Interview Details:
-Date: {date}
-Time: {time}
-Location: Virtual (Google Meet)
-Link:
-
-We are excited to discuss your skills and qualifications further. Your interview details have been added to our calendar. If the provided timing is not suitable, please let us know, and we will try our best to accommodate.
-
-We look forward to meeting you and learning more about your potential contributions to our team.
-
-Best regards,
-[Your Name]
-Hiring Plug Team
-"
+        f"Subject: Hiring Plug Interview \n\n"
+        f"Dear {person_name},\n\n"
+        f"Congratulations! You have been selected for an interview with Hiring Plug for the  role.\n\n"
+        f"Interview Details:\n"
+        f"Date: {date}\n"
+        f"Time: {time}\n"
+        f"Location: Virtual (Google Meet)\n\n"
+        f"We are excited to discuss your skills and qualifications further. Your interview details have been added to our calendar. If the provided timing is not suitable, please let us know, and we will try our best to accommodate.\n\n"
+        f"We look forward to meeting you and learning more about your potential contributions to our team.\n\n"
+        f"Best regards,\n"
+        f"[Your Name]\n"
+        f"Hiring Plug Team"
     )
 
     # Execute the agent.run function for scheduling the meeting
