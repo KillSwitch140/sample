@@ -24,15 +24,16 @@ from langchain.utilities.zapier import ZapierNLAWrapper
 
 zapier_nla_api_key = st.secrets["ZAP_API_KEY"]
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-client = QdrantClient(
-    url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
-    api_key=st.secrets["QDRANT_API_KEY"],
-)
 
-client.recreate_collection(
-    collection_name="resume_bot",
-    vectors_config=VectorParams(size=4, distance=Distance.DOT),
-)
+# client = QdrantClient(
+#     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
+#     api_key=st.secrets["QDRANT_API_KEY"],
+# )
+
+# client.recreate_collection(
+#     collection_name="resume_bot",
+#     vectors_config=VectorParams(size=4, distance=Distance.DOT),
+# )
 
 def read_pdf_text(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
