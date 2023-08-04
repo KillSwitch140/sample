@@ -23,6 +23,8 @@ from qdrant_client import QdrantClient,models
 from qdrant_client.http.models import PointStruct
 from langchain.agents import initialize_agent
 from langchain.vectorstores import Qdrant
+from zap import schedule_interview
+
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 os.environ['QDRANT_COLLECTION'] ="resume"
