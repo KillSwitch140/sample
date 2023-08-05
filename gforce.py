@@ -86,7 +86,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
                         If you are asked to summarize a candidate'sresume, summarize it in 7 sentences, 3 sentences for their experience, 2 sentences projects, 1 sentence for their education and 1 sentence for their skills\
                         If you are asked to compare certain candidates just provide the separate summarization of those candidate's resumes.\
                         If you are asked for the candidate's email, provide them with the candidate's email along with the candidate's name\
-                        If you asked to select a candidate based on certain skills or experience then go through the resumes and find teh candidate with the relevant skills or experience and provide the hiring manager with the candidate's name along with their experience and skills/
+                        If you asked to select a candidates based on certain skills or experience then go through the resumes and find the candidates with the relevant skills or experience and provide the hiring manager with a list of those candidates/
 
     Context: {context}
     Question: {question}
