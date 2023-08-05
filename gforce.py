@@ -35,9 +35,13 @@ client = QdrantClient(
     api_key=st.secrets["QDRANT_API_KEY"],
 )
 
-if client.has_collection(QDRANT_COLLECTION):
-    # Delete all entities (data points) from the collection
-    client.delete_entities(QDRANT_COLLECTION)
+# Get a list of all existing collections
+collections = client.get_collections()
+
+# Check if the collection exists before attempting to clear its data
+if QDRANT_COLLECTION in collections:
+    # Delete the collection and all its data
+    client.delete_collection(collection_name="QDRANT_COLLECTION")
     
 collection_config = qdrant_client.http.models.VectorParams(
         size=1536,
