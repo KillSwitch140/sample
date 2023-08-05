@@ -27,19 +27,24 @@ from zap import schedule_interview
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-os.environ['QDRANT_COLLECTION'] ="resume"
+QDRANT_COLLECTION ="resume"
 
 
 client = QdrantClient(
     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
     api_key=st.secrets["QDRANT_API_KEY"],
 )
+
+if client.has_collection(QDRANT_COLLECTION):
+    # Delete all entities (data points) from the collection
+    client.delete_entities(QDRANT_COLLECTION)
+    
 collection_config = qdrant_client.http.models.VectorParams(
         size=1536,
         distance=qdrant_client.http.models.Distance.COSINE
     )
 client.recreate_collection(
-   collection_name=os.getenv("QDRANT_COLLECTION"),
+   collection_name=QDRANT_COLLECTION,
     vectors_config=collection_config)
 
 
@@ -71,7 +76,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333",
     prefer_grpc=True,
     api_key=st.secrets["QDRANT_API_KEY"],
-    collection_name="resume",
+    collection_name=QDRANT_COLLECTION,
     force_recreate=True,
 )
     # Create retriever interface
