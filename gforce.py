@@ -79,17 +79,32 @@ def generate_response(doc_texts, openai_api_key, query_text):
     retriever = db.as_retriever(search_type="similarity")
     #Bot memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    # template  = """
-    #         You are an AI assistant created to help hiring managers review resumes and shortlist candidates. You have been provided with resumes and job descriptions to review. When asked questions, use the provided documents to provide helpful and relevant information to assist the hiring manager. Be concise, polite and professional. Do not provide any additional commentary or opinions beyond answering the questions directly based on the provided documents.
-    #         Question:{query}
-    # """
-    # QA_CHAIN_PROMPT = PromptTemplate.from_template(template,input_variables=['query'])
-    # QA_CHAIN_PROMPT.format(query= query_text)
-    #Create QA chain 
-    qa = ConversationalRetrievalChain.from_llm(llm=llm,retriever=retriever,memory=memory)
-    response = qa.run(query_text)
+    custom_prompt_template = """You are a hiring manager's helpful assistant that reads multiple resumes of candidates and answers any questions related to the candidates,\
+                        Only answer the quesions truthfully and accurate do not provide further details.\
+                        If you don't know the answer, just say that you don't know, don't try to make up an answer.\
+                        If you are asked to summarize a candidate'sresume, summarize it in 7 sentences, 3 sentences for their experience, 2 sentences projects, 1 sentence for their education and 1 sentence for their skills\
+                        If you are asked to compare certain candidates just provide the separate summarization of those candidate's resumes
+
+    Context: {context}
+    Question: {question}
+
+    Only return the helpful answer below and nothing else.
+    Helpful answer:
+    """
     
-    return response
+    prompt = PromptTemplate(template=custom_prompt_template,
+                            input_variables=['context', 'question'])
+    
+    docs = db.similarity_search(query_text)
+    #Create QA chain 
+    qa =  RetrievalQA.from_chain_type(llm=llm,
+                                       chain_type='stuff',
+                                       retriever=retriever,
+                                       return_source_documents=False,
+                                       chain_type_kwargs={'prompt': prompt}
+                                       )
+    response = qa({'query': query_text})
+    return response["result"]
     
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
