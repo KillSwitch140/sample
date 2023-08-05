@@ -118,10 +118,10 @@ st.set_page_config(page_title='Gforce Resume Assistant', layout='wide')
 st.title('Gforce Resume Assistant')
 
 # File upload
-uploaded_files = st.file_uploader('Upload PDF(s)', type=['pdf'], accept_multiple_files=True)
+uploaded_files = st.file_uploader('Please upload you resume(s)', type=['pdf'], accept_multiple_files=True)
 
 # Query text
-query_text = st.text_input('Enter your question:', placeholder='Please provide a short summary.')
+query_text = st.text_input('Enter your question:', placeholder='Select candidates based on experience and skills')
 
 # Initialize chat placeholder as an empty list
 if "chat_placeholder" not in st.session_state.keys():
