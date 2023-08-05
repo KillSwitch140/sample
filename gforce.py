@@ -27,29 +27,29 @@ from zap import schedule_interview
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-QDRANT_COLLECTION ="resume"
+# QDRANT_COLLECTION ="resume"
 
 
-client = QdrantClient(
-    url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
-    api_key=st.secrets["QDRANT_API_KEY"],
-)
+# client = QdrantClient(
+#     url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333", 
+#     api_key=st.secrets["QDRANT_API_KEY"],
+# )
 
-# Get a list of all existing collections
-collections = client.get_collections()
+# # Get a list of all existing collections
+# collections = client.get_collections()
 
-# Check if the collection exists before attempting to clear its data
-if QDRANT_COLLECTION in collections:
-    # Delete the collection and all its data
-    client.delete_collection(collection_name="QDRANT_COLLECTION")
+# # Check if the collection exists before attempting to clear its data
+# if QDRANT_COLLECTION in collections:
+#     # Delete the collection and all its data
+#     client.delete_collection(collection_name="QDRANT_COLLECTION")
     
-collection_config = qdrant_client.http.models.VectorParams(
-        size=1536,
-        distance=qdrant_client.http.models.Distance.COSINE
-    )
-client.recreate_collection(
-   collection_name=QDRANT_COLLECTION,
-    vectors_config=collection_config)
+# collection_config = qdrant_client.http.models.VectorParams(
+#         size=1536,
+#         distance=qdrant_client.http.models.Distance.COSINE
+#     )
+# client.recreate_collection(
+#    collection_name=QDRANT_COLLECTION,
+#     vectors_config=collection_config)
 
 
 
@@ -74,17 +74,9 @@ def generate_response(doc_texts, openai_api_key, query_text):
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     
     # Create a vectorstore from documents
-    qdrant = Qdrant.from_documents(
-    texts,
-    embeddings,
-    url="https://fd3fb6ff-e014-4338-81ce-7d6e9db358b3.eu-central-1-0.aws.cloud.qdrant.io:6333",
-    prefer_grpc=True,
-    api_key=st.secrets["QDRANT_API_KEY"],
-    collection_name=QDRANT_COLLECTION,
-    force_recreate=False,
-)
+    db = Chroma.from_documents(texts, embeddings)
     # Create retriever interface
-    retriever = qdrant.as_retriever(search_type="similarity")
+    retriever = db.as_retriever(search_type="similarity")
     #Bot memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     # template  = """
