@@ -81,7 +81,7 @@ def generate_response(doc_texts, openai_api_key, query_text):
     prefer_grpc=True,
     api_key=st.secrets["QDRANT_API_KEY"],
     collection_name=QDRANT_COLLECTION,
-    force_recreate=True,
+    force_recreate=False,
 )
     # Create retriever interface
     retriever = qdrant.as_retriever(search_type="similarity")
