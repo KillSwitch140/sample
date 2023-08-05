@@ -23,7 +23,7 @@ def schedule_interview(person_name, person_email, date, time):
     date_time = f"{date} at {time}"
     schedule_meet = f"Schedule a 30 min virtual Google Meet titled {meeting_title} on {date_time}. Add the created meeting's details as a new event in my calendar"
     send_email = (
-        f"Draft personalised, professional email to {person_email} notifying {person_name} that they have been selected for an interview with Hiring Plug.Let them know a a google meet interview has been scheduled with them and ask them to confirm if they are available at the scheduled meet time"
+        f"Draft email to {person_email}"
     )
 
     # Execute the agent.run function for scheduling the meeting
