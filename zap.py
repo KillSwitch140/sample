@@ -21,7 +21,7 @@ def schedule_interview(person_name, person_email, date, time):
     # Create the combined string
     meeting_title = f"Hiring Plug Interview with {person_name}"
     date_time = f"{date} at {time}"
-    schedule_meet = f"Schedule a 30 min meeting titled {meeting_title} on {date_time}. Quick add the created meeting's details as a new event in my calendar"
+    schedule_meet = f"Schedule a 30 minute meeting titled {meeting_title} on {date_time}. Quick add the created meeting's details as a new event in my calendar"
     send_email = (
         f"Send email to {person_email}"
     )
