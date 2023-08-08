@@ -19,11 +19,11 @@ agent = initialize_agent(toolkit.get_tools(), llm, agent="zero-shot-react-descri
 
 def schedule_interview(person_name, person_email, date, time):
     # Create the combined string
-    meeting_title = f"Hiring Plug Interview with {person_email}"
+    meeting_title = f"Hiring Plug Interview with {person_name}"
     date_time = f"{date} at {time}"
-    schedule_meet = f"Schedule a 30 min virtual Google Meet titled {meeting_title} on {date_time}. Add the created meeting's details as a new event in my calendar"
+    schedule_meet = f"Schedule a 30 min meeting titled {meeting_title} on {date_time}. Quick add the created meeting's details as a new event in my calendar"
     send_email = (
-        f"Draft email to {person_email}"
+        f"Send email to {person_email}"
     )
 
     # Execute the agent.run function for scheduling the meeting
