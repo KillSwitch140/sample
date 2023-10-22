@@ -23,7 +23,7 @@ from qdrant_client import QdrantClient,models
 from qdrant_client.http.models import PointStruct
 from langchain.agents import initialize_agent
 from langchain.vectorstores import Qdrant
-from zap import schedule_interview
+#from zap import schedule_interview
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -142,30 +142,30 @@ def clear_chat_history():
 st.button('Clear Chat History', on_click=clear_chat_history)
 
 # Create a sidebar with text input boxes and a button
-st.sidebar.header("Schedule Interview")
-person_name = st.sidebar.text_input("Enter Person's Name", "")
-person_email = st.sidebar.text_input("Enter Person's Email Address", "")
-date = st.sidebar.date_input("Select Date for Interview")
-time = st.sidebar.time_input("Select Time for Interview")
-schedule_button = st.sidebar.button("Schedule Interview")
+# st.sidebar.header("Schedule Interview")
+# person_name = st.sidebar.text_input("Enter Person's Name", "")
+# person_email = st.sidebar.text_input("Enter Person's Email Address", "")
+# date = st.sidebar.date_input("Select Date for Interview")
+# time = st.sidebar.time_input("Select Time for Interview")
+# schedule_button = st.sidebar.button("Schedule Interview")
 
-if schedule_button:
-    if not person_name:
-        st.sidebar.error("Please enter the person's name.")
-    elif not person_email:
-        st.sidebar.error("Please enter the person's email address.")
-    elif not date:
-        st.sidebar.error("Please select the date for the interview.")
-    elif not time:
-        st.sidebar.error("Please select the time for the interview.")
-    else:
-        # Call the schedule_interview function from the zap.py file
-        success = schedule_interview(person_name, person_email, date, time)
+# if schedule_button:
+#     if not person_name:
+#         st.sidebar.error("Please enter the person's name.")
+#     elif not person_email:
+#         st.sidebar.error("Please enter the person's email address.")
+#     elif not date:
+#         st.sidebar.error("Please select the date for the interview.")
+#     elif not time:
+#         st.sidebar.error("Please select the time for the interview.")
+#     else:
+#         # Call the schedule_interview function from the zap.py file
+#         success = schedule_interview(person_name, person_email, date, time)
 
-        if success:
-            st.sidebar.success("Interview Scheduled Successfully!")
-        else:
-            st.sidebar.error("Failed to Schedule Interview")
+#         if success:
+#             st.sidebar.success("Interview Scheduled Successfully!")
+#         else:
+#             st.sidebar.error("Failed to Schedule Interview")
   # custom_prompt_template = """You are a hiring manager's helpful assistant that reads multiple resumes of candidates and answers the hiring manager's questions related to the candidates,\
   #                       Do your best to answer the hiring manager's so that it helps them select candidates better\
   #                       Your goal is to aid the hiring in the candidate selection process.
