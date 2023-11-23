@@ -3,10 +3,10 @@ import datetime
 import os
 from os import environ
 import PyPDF2
-from langchain.agents import AgentType, initialize_agent
-from langchain.agents.agent_toolkits import ZapierToolkit
-from langchain.llms import OpenAI
-from langchain.utilities.zapier import ZapierNLAWrapper
+# from langchain.agents import AgentType, initialize_agent
+# from langchain.agents.agent_toolkits import ZapierToolkit
+# from langchain.llms import OpenAI
+# from langchain.utilities.zapier import ZapierNLAWrapper
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -21,9 +21,9 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import qdrant_client
 from qdrant_client import QdrantClient,models
 from qdrant_client.http.models import PointStruct
-from langchain.agents import initialize_agent
-from langchain.vectorstores import Qdrant
-from zap import schedule_interview
+# from langchain.agents import initialize_agent
+# from langchain.vectorstores import Qdrant
+# from zap import schedule_interview
 
 
 openai_api_key = st.secrets["OPENAI_API_KEY"]
