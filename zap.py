@@ -9,7 +9,7 @@ import time
 
 
 zapier_nla_api_key = st.secrets["ZAP_API_KEY"]
-environ["ZAPIER_NLA_API_KEY"] = zapier_nla_api_key
+
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 llm = OpenAI(temperature=0)
