@@ -4,7 +4,7 @@ import os
 from os import environ
 import PyPDF2
 from langchain.agents import initialize_agent
-from langchain.agents.agent_toolkits import ZapierToolkit
+from langchain.agent_toolkits import ZapierToolkit
 from langchain.utilities.zapier import ZapierNLAWrapper
 from langchain.llms import OpenAI
 from langchain.memory import ConversationBufferMemory
