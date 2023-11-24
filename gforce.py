@@ -155,7 +155,7 @@ st.button('Clear Chat History', on_click=clear_chat_history)
 
 # Create a sidebar with text input boxes and a button
 st.sidebar.header("Schedule Interview")
-st.sidebar.subheader("Unfortunately the API to schedule an interview is no longer supported. \n Sorry for the inconvenience", "")
+st.sidebar.subheader("Unfortunately the API to schedule an interview is no longer supported.\nSorry for the inconvenience", "")
 person_name = st.sidebar.text_input("Enter Person's Name", "")
 person_email = st.sidebar.text_input("Enter Person's Email Address", "")
 date = st.sidebar.date_input("Select Date for Interview")
